@@ -11,6 +11,8 @@ const client = require("twilio")(accountSid, authToken);
 
 let signupData;
 let otp = null;
+let tutorSignupData;
+let otpTutor = null;
 
 let transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
@@ -22,11 +24,9 @@ let transporter = nodemailer.createTransport({
   },
 });
 
-let sendEmailOTP = (email) => {
-  const otpEmail = Math.floor(1000 + Math.random() * 9000);
-  otp = otpEmail;
-
-  console.log(otp);
+let sendEmailOTP = (email,otpEmail) => {
+  
+  console.log(otpEmail);
 
   const mailOptions = {
     to: email,
@@ -105,8 +105,12 @@ module.exports.getOtp = async (req, res, next) => {
         password,
         place,
       };
+
+      const otpEmail = Math.floor(1000 + Math.random() * 9000);
+      otp = otpEmail;
+
       
-      sendEmailOTP(email)
+      sendEmailOTP(email,otpEmail)
         .then((info) => {
           console.log(`Message sent: ${info.messageId}`);
           console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
@@ -191,7 +195,7 @@ module.exports.signup = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error, "kkk");
-    let errors = "Something gone wrong";
+    let errors = handleError(error);
     res.status(400).json({ errors, created: false });
   }
 };
@@ -220,34 +224,98 @@ module.exports.signin = async (req, res, next) => {
   }
 };
 
-module.exports.tutorSignup = async (req, res, next) => {
+module.exports.getTutorOtp = async (req,res,next) => {
   try {
-    const {
-      name,
-      email,
-      phone,
-      subjects,
-      timeFrom,
-      timeTo,
-      profession,
-      password,
-      place,
-    } = req.body;
-    const tutor = await tutors.create({
-      name,
-      email,
-      phone,
-      subjects,
-      timeFrom,
-      timeTo,
-      profession,
-      password,
-      place,
-    });
+    const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,} = req.body;
 
-    res.status(200).json({ message: "Successfully registered", created: true });
+    const tutor = await tutors.findOne({ email });
+    if(!tutor){
+
+      tutorSignupData = { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,}
+
+      const otpEmail = Math.floor(1000 + Math.random() * 9000);
+  otpTutor = otpEmail;
+
+      sendEmailOTP(email,otpEmail)
+        .then((info) => {
+          console.log(`Message sent: ${info.messageId}`);
+          console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+        })
+        .catch((error) => {
+          throw error;
+        });
+      sendPhoneOTP(phone)
+        .then((verification) => {
+          console.log(`OTP sent to ${verification.to} `);
+        })
+        .catch((error) => {
+          throw error;
+        });
+      
+      res
+        .status(200)
+        .json({
+          message: "OTP is send to given email and phone number",
+          otpSend: true,
+        });
+    }else {
+      res
+        .status(200)
+        .json({
+          message: "There is already a tutor with same email",
+          otpSend: false,
+        });
+    }
   } catch (error) {
     console.log(error);
+    const errors = handleErrorT(error);
+    res.status(400).json({ errors, otpSend: false });
+  }
+}
+module.exports.tutorSignup = async (req, res, next) => {
+  const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,} = tutorSignupData;
+  const { otpPhone, otpEmail } = req.body;
+  try {
+
+    if(otpEmail == otpTutor){
+      console.log("innnnn");
+
+      verifyPhoneOTP(phone,otpPhone).then(async()=>{
+        console.log('otp verified');
+        const tutor = await tutors.create({
+          name,
+          email,
+          phone,
+          subjects,
+          timeFrom,
+          timeTo,
+          profession,
+          password,
+          place,
+        });
+    res.status(200).json({ message: "Successfully registered", created: true });
+
+      }).catch((error)=>{
+        console.log(error);
+        res
+            .status(200)
+            .json({
+              message: "Entered OTP from mobile is incorrect",
+              created: false,
+            });
+      })
+
+    }else{
+      res
+        .status(200)
+        .json({
+          message: "Entered OTP from email is incorrect",
+          created: false,
+        });
+    }
+
+  } catch (error) {
+    console.log(error,"tutorr");
     const errors = handleErrorT(error);
     res.status(400).json({ errors, created: false });
   }
