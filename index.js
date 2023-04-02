@@ -9,8 +9,17 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const studentRouter = require('./routes/studentRouter')
 const authRouter = require('./routes/authRouter')
+const adminRouter = require('./routes/adminRouter')
 
 dbConnection()
+app.use(
+  cors({
+    origin : "*",
+    methods:['GET','POST','DELETE','PUT'],
+    credentials:true,
+  })
+)
+
 
 app.listen(4000,()=>{
   console.log('Server started at PORT 4000');
@@ -23,13 +32,7 @@ app.use(session({
   cookie: { maxAge: 60 * 60 * 24 * 1 * 1000 }
 }));
 
-app.use(
-  cors({
-    origin : "*",
-    methods:['GET','POST','DELETE','PUT'],
-    credentials:true,
-  })
-)
+
 
 
 
@@ -46,3 +49,4 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", studentRouter);
 app.use('/auth',authRouter);
+app.use('/admin',adminRouter);

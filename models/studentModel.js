@@ -16,13 +16,15 @@ const studentSchema = new mongoose.Schema({
     type:String,
     required:true
   },
-  branch:{
-    type:String,
-    required:true
-  },
   board:{
-    type:String,
-    required:true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'board',
+    required:true,
+  },
+  branch:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'branch',
+    required:true,
   },
   school:{
     type:String,

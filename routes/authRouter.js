@@ -1,4 +1,4 @@
-const { signup, signin, tutorSignup, tutorSignin, getOtp, getTutorOtp } = require('../controller/authController');
+const { signup, signin, tutorSignup, tutorSignin, getOtp, getTutorOtp, adminSignin } = require('../controller/authController');
 
 const router = require('express').Router()
 
@@ -9,6 +9,8 @@ router.post('/signin',signin)
 router.post('/tutor-signup',getTutorOtp)
 router.post('/verify-tutor-otp',tutorSignup)
 router.post('/tutor-signin',tutorSignin)
+router.post('/admin-signin',adminSignin)
+
 
 
 

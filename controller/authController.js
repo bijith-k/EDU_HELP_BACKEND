@@ -1,5 +1,6 @@
 const students = require("../models/studentModel");
 const tutors = require("../models/tutorModel");
+const admins = require('../models/adminModel')
 const jwt = require("jsonwebtoken");
 const maxAge = 3 * 24 * 60 * 60;
 const bcrypt = require("bcrypt");
@@ -90,8 +91,11 @@ const handleErrorT = (err) => {
 
 module.exports.getOtp = async (req, res, next) => {
   try {
+    console.log(req.body);
     const { name, email, phone, branch, board, school, password, place } =
       req.body;
+
+
     const student = await students.findOne({ email });
     if (!student) {
      
@@ -335,6 +339,31 @@ module.exports.tutorSignin = async (req, res, next) => {
       }
     } else {
       res.json({ message: "No tutor with the entered email", created: false });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ message: "Something gone wrong", created: false });
+  }
+};
+
+
+module.exports.adminSignin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await admins.findOne({ email });
+    if (admin) {
+      const auth = await bcrypt.compare(password, admin.password);
+      if (auth) {
+        const token = createToken(admin._id);
+        res.json({ messge: "Login successful", created: true, token,admin });
+      } else {
+        res.json({ message: "Password is incorrect", created: false });
+      }
+    } else {
+      res.json({
+        message: "No admin with the entered email",
+        created: false,
+      });
     }
   } catch (error) {
     console.log(error);
