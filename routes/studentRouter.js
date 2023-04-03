@@ -16,12 +16,12 @@ router.post('/',CheckStudent)
 router.post('/upload-notes',verifyStudent,upload.single('note'),notesUpload)
 router.post('/upload-question-papers',verifyStudent,upload.single('questions'),questionPaperUpload)
 router.post('/upload-videos',verifyStudent,videoUpload)
-router.get('/get-question-papers',getQuestionPapers)
-router.get('/get-notes',getNotes)
-router.get('/get-videos',getVideos)
-router.get('/boards',allBoards)
-router.get('/branches',allBranches)
-router.get('/subjects',allSubjects)
+router.get('/get-question-papers',verifyStudent,getQuestionPapers)
+router.get('/get-notes',verifyStudent,getNotes)
+router.get('/get-videos',verifyStudent,getVideos)
+router.get('/boards',verifyStudent,allBoards)
+router.get('/branches',verifyStudent,allBranches)
+router.get('/subjects',verifyStudent,allSubjects)
 
 
 

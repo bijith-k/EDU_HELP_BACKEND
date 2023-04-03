@@ -153,8 +153,8 @@ module.exports.getOtp = async (req, res, next) => {
 
 module.exports.signup = async (req, res, next) => {
   console.log("inn");
-  const { name, email, phone, branch, board, school, password, place } =
-    signupData;
+  
+  const { name, email, phone, branch, board, school, password, place } = signupData;
   const { otpPhone, otpEmail } = req.body;
 
   try {
