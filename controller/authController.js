@@ -230,6 +230,7 @@ module.exports.signin = async (req, res, next) => {
 
 module.exports.getTutorOtp = async (req,res,next) => {
   try {
+    console.log(req.body);
     const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,} = req.body;
 
     const tutor = await tutors.findOne({ email });
@@ -277,6 +278,7 @@ module.exports.getTutorOtp = async (req,res,next) => {
   }
 }
 module.exports.tutorSignup = async (req, res, next) => {
+  
   const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,} = tutorSignupData;
   const { otpPhone, otpEmail } = req.body;
   try {

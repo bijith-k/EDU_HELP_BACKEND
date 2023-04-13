@@ -36,9 +36,13 @@ const tutorSchema = new mongoose.Schema({
     type:String,
     required:true
   },
-  status:{
-    type:String,
-    default:'unblocked'
+  approved:{
+    type:Boolean,
+    default:'false'
+  },
+  blocked:{
+    type:Boolean,
+    default:'false'
   },
   password:{
     type:String,

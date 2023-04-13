@@ -10,6 +10,7 @@ const path = require('path')
 const studentRouter = require('./routes/studentRouter')
 const authRouter = require('./routes/authRouter')
 const adminRouter = require('./routes/adminRouter')
+const tutorRouter = require('./routes/tutorRouter')
 
 dbConnection()
 app.use(
@@ -50,3 +51,4 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", studentRouter);
 app.use('/auth',authRouter);
 app.use('/admin',adminRouter);
+app.use('/tutor',tutorRouter);

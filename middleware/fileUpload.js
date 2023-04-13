@@ -2,18 +2,22 @@ const multer = require('multer');
 const path = require('path');
 
 
-try {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
 
     let uploadPath = '';
+    console.log('inside multer');
 
     // Check the input field name to set the upload path
     if (file.fieldname === 'note') {
       uploadPath = path.join('public','uploads', 'notes');
-    } else {
+    } else if (file.fieldname === 'question') {
       uploadPath = path.join('public','uploads', 'question-papers');
+    } else if (file.fieldname === 'poster') {
+      uploadPath = path.join('public','uploads', 'events');
+    }else {
+      uploadPath = path.join('public','uploads');
     }
     cb(null, uploadPath);
   },
@@ -22,10 +26,25 @@ const storage = multer.diskStorage({
   }
 });
 
-module.exports.upload = multer({ storage });
+const upload = multer({ storage });
 
+function handleUpload(fieldname){
+   return function (req,res,next) {
+    upload.single(fieldname)(req,res,(err)=>{
+      if(err){
+        console.log(err);
+        return res.status(500).json({ messge: "Something gone wrong"});
+      }
+      next()
+    })
+   }
 }
-catch (err) {
-  console.log(err,"sf");
-  res.status(500).json({ messge: "Something gone wrong"});
-}
+
+module.exports = handleUpload;
+
+
+// }
+// catch (err) {
+//   console.log(err,"sf");
+//   res.status(500).json({ messge: "Something gone wrong"});
+// }

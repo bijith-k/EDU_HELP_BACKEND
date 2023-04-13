@@ -30,9 +30,9 @@ const studentSchema = new mongoose.Schema({
     type:String,
     required:true
   },
-  status:{
-    type:String,
-    default:'unblocked'
+  blocked:{
+    type:Boolean,
+    default:'false'
   },
   password:{
     type:String,
