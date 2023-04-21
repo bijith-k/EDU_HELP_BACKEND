@@ -6,7 +6,7 @@ const plansSchema = new mongoose.Schema({
     required:true
   },
   duration:{
-    type:String,
+    type:Number,
     required:true
   },
   price:{
@@ -17,10 +17,22 @@ const plansSchema = new mongoose.Schema({
     type:Boolean,
     default:'true'
   },
-  used_by:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'students'
-  }
+  used_by: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'students',
+      required: true
+    },
+    startedAt: {
+      type: Date,
+      default: Date.now,
+      required: true
+    },
+    expiredAt: {
+      type: Date,
+      required: true
+    }
+  }]
 })
 
 

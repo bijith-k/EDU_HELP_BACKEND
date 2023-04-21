@@ -9,7 +9,10 @@ const { allBranches } = require('../controller/branchController');
 const { allSubjects } = require('../controller/subjectController');
 const { addEvent, getEvents } = require('../controller/eventController');
 const { getPlans } = require('../controller/planController');
-
+const { getTutors } = require('../controller/tutorController');
+const { planPayment, verifyPayment, planDetails } = require('../controller/studentController');
+const { newConversation, getConversation } = require('../controller/conversationController');
+const { newMessage, getMessage } = require('../controller/messageController');
 
 const router = require('express').Router()
 
@@ -24,15 +27,24 @@ router.get('/get-notes',verifyStudent,getNotes)
 router.get('/get-videos',verifyStudent,getVideos)
 router.get('/get-events',verifyStudent,getEvents)
 router.get('/get-plans',verifyStudent,getPlans)
+router.get('/get-tutors',verifyStudent,getTutors)
 router.get('/boards',verifyStudent,allBoards)
 router.get('/branches',verifyStudent,allBranches)
 router.get('/subjects',verifyStudent,allSubjects)
+router.get('/plan-details',verifyStudent,planDetails)
 
 router.put('/notes-private-public',verifyStudent,privatePublicNotes)
 router.put('/videos-private-public',verifyStudent,privatePublicVideos)
 router.put('/questions-private-public',verifyStudent,privatePublicQuestions)
 
 
+router.post('/buy-plan', verifyStudent, planPayment)
+router.post('/verify-payment', verifyStudent, verifyPayment)
 
+//message
+router.post('/new-conversation',verifyStudent,newConversation)
+router.get('/get-conversation/:userId', verifyStudent,getConversation)
+router.post('/new-message',verifyStudent,newMessage)
+router.get('/get-message/:conversationId',verifyStudent, getMessage)
 
 module.exports = router;

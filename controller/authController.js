@@ -1,6 +1,9 @@
 const students = require("../models/studentModel");
 const tutors = require("../models/tutorModel");
 const admins = require('../models/adminModel')
+const boards = require('../models/boardModel')
+const branch = require('../models/branchModel')
+
 const jwt = require("jsonwebtoken");
 const maxAge = 3 * 24 * 60 * 60;
 const bcrypt = require("bcrypt");
@@ -207,8 +210,9 @@ module.exports.signup = async (req, res, next) => {
 module.exports.signin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const student = await students.findOne({ email });
+    const student = await students.findOne({ email })
     if (student) {
+      
       const auth = await bcrypt.compare(password, student.password);
       if (auth) {
         const token = createToken(student._id);
@@ -231,12 +235,12 @@ module.exports.signin = async (req, res, next) => {
 module.exports.getTutorOtp = async (req,res,next) => {
   try {
     console.log(req.body);
-    const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,} = req.body;
+    const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch} = req.body;
 
     const tutor = await tutors.findOne({ email });
     if(!tutor){
 
-      tutorSignupData = { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,}
+      tutorSignupData = { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch}
 
       const otpEmail = Math.floor(1000 + Math.random() * 9000);
   otpTutor = otpEmail;
@@ -279,7 +283,7 @@ module.exports.getTutorOtp = async (req,res,next) => {
 }
 module.exports.tutorSignup = async (req, res, next) => {
   
-  const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,} = tutorSignupData;
+  const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch} = tutorSignupData;
   const { otpPhone, otpEmail } = req.body;
   try {
 
@@ -298,6 +302,8 @@ module.exports.tutorSignup = async (req, res, next) => {
           profession,
           password,
           place,
+          board,
+          branch
         });
     res.status(200).json({ message: "Successfully registered", created: true });
 
@@ -372,3 +378,42 @@ module.exports.adminSignin = async (req, res, next) => {
     res.json({ message: "Something gone wrong", created: false });
   }
 };
+
+
+
+module.exports.boards = async(req,res,next) =>{
+  try {
+
+    const board = await boards.find()
+    res.json({ status: true, message: "success", board });
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+module.exports.branches = async(req,res,next)=>{
+  try {
+    
+    const {board} = req.query
+
+    if (!board) {
+    const branches = await branch.find()
+    res.json({ status: true, message: "success", branches });
+       
+    }else{
+    const selectedBoard = await boards.findById(board)
+    if(!selectedBoard){
+
+      return res.status(404).json({message:'selected board not found'})
+    }
+    const branches = await branch.find({board:selectedBoard})
+    res.json({ status: true, message: "success", branches });
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({message:'Server gone...'})
+  }
+}

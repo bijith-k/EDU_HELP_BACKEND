@@ -31,3 +31,25 @@ module.exports.adminBlockUnblockTutor = async(req,res,next) =>{
 res.status(500).json({ message: "Something gone wrong", success: false });
   }
 }
+
+
+module.exports.getTutors = async(req,res,next) =>{
+  try {
+      const {id} = req.query
+      if(id){
+        const tutor = await tutors.find({_id:id, blocked: false }).populate('branch', 'name').populate('board', 'name')
+        // console.log(tutor,"lls");
+        res.json(tutor);
+      }else{
+        const tutor = await tutors.find({ blocked: false }).populate('branch', 'name').populate('board', 'name')
+        // console.log(tutor,"lls");
+        res.json(tutor);
+      }
+      
+    
+    
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}

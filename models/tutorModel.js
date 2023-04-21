@@ -16,6 +16,16 @@ const tutorSchema = new mongoose.Schema({
     type:String,
     required:true
   },
+  board:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'board',
+    required:true,
+  },
+  branch:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'branch',
+    required:true,
+  },
   subjects:{
     type:Array,
     required:true

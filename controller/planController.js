@@ -71,15 +71,11 @@ module.exports.updatePlans = async(req,res,next) =>{
     console.log(req.body,'body');
     const {plan} = req.query
 
-    
-
     let updatedData = {
       plan:req.body.plan,
       duration:req.body.duration,
       price:req.body.price,
     }
-
-    
 
     let updatedPlan  = await plans.findByIdAndUpdate({_id:plan},updatedData)
 
@@ -108,3 +104,4 @@ module.exports.getPlans = async(req,res,next) =>{
       res.status(500).json({ message: "Server error" });
     }
   }
+

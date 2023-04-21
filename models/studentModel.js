@@ -26,6 +26,21 @@ const studentSchema = new mongoose.Schema({
     ref: 'branch',
     required:true,
   },
+  subscription: {
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'plans',
+    },
+    startedAt: {
+      type: Date,
+      default: Date.now,
+      
+    },
+    expiredAt: {
+      type: Date,
+      
+    }
+  },
   school:{
     type:String,
     required:true
@@ -45,6 +60,10 @@ const studentSchema = new mongoose.Schema({
   }
 })
 
+
+studentSchema.virtual('subscription.isActive').get(function(){
+  return Date.now() < this.subscription.expiredAt;
+})
 
 studentSchema.pre("save",async function (next) {
   const salt = await bcrypt.genSalt()
