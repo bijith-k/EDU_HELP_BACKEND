@@ -37,14 +37,14 @@ res.status(500).json({ messge: "Something gone wrong", uploaded: false });
 module.exports.getQuestionPapers = async(req,res,next) =>{
   try {
      const {id} = req.query
-     console.log(id,'qid');
+     
      if(id){
       const questions = await questionPapers.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
-      console.log(questions,'ooooooooooooooooooooooooooooooo');
+       
       res.json(questions);
      }else{
       const questions = await questionPapers.find({listed:true}).populate('branch','name').populate('subject','name')
-      console.log(questions,"heeeeeeeeeeee");
+      
       res.json(questions);
      }
     

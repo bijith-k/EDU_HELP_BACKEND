@@ -34,16 +34,16 @@ res.status(500).json({ messge: "Something gone wrong", uploaded: false });
 module.exports.getVideos = async(req,res,next) =>{
   try {
      const {id} = req.query
-     console.log(id,'vid');
+     
     if(id){
       const video = await videos.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
-      console.log(video,"ll");
+      
       res.json(video);
     }
     else{
-      console.log('inside else video');
+      
       const video = await videos.find({listed:true,private:false}).populate('branch','name').populate('subject','name')
-      console.log(video,"ll");
+       
       res.json(video);
     }
     

@@ -24,12 +24,12 @@ app.use(
 
 
 
-app.use(session({
-  secret: 'secret_key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 60 * 60 * 24 * 1 * 1000 }
-}));
+// app.use(session({
+//   secret: 'secret_key',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: { maxAge: 60 * 60 * 24 * 1 * 1000 }
+// }));
 
 
  

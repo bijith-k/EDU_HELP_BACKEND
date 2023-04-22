@@ -2,6 +2,14 @@ const students = require('../models/studentModel')
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
 const plans = require('../models/plansModel')
+const notes = require('../models/notesModel')
+const videos = require('../models/videosModel')
+const questionPapers = require('../models/questionPaperModel')
+const bcrypt = require("bcrypt");
+
+
+
+
 
 const key_id = process.env.KEY_ID
 const key_secret = process.env.SECRET_KEY
@@ -211,5 +219,71 @@ module.exports.updateProfile = async(req,res) =>{
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something gone wrong", updated: false });
+  }
+}
+
+module.exports.getUploadsCounts = async(req,res) => {
+  try {
+
+    const { id } = req.query
+    const noteCounts = (await notes.find({ uploadedBy: { $in: [id] } })).length
+    const videoCounts = (await videos.find({ uploadedBy: { $in: [id] } })).length
+    const questionCounts = (await questionPapers.find({ uploadedBy: { $in: [id] } })).length
+
+    res.json({noteCounts, videoCounts, questionCounts});
+     
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+
+module.exports.getSubscribedPlan = async (req, res, next) => {
+  try {
+     
+    const { id } = req.query
+
+    const subscribedPlan = await plans.findOne({
+      used_by:{
+        $elemMatch:{
+          user:id,
+          expiredAt: {$gte:new Date()}
+        }
+      }
+    })
+   
+    if (subscribedPlan) {
+      return res.status(200).json({ message: 'You have a subscription plan', plan: subscribedPlan, subscribed: true })
+    } else {
+      return res.status(200).json({ message: 'Your plan expired or you have no subscription', subscribed: false })
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+
+module.exports.changePassword = async(req,res) =>{
+  try {
+    const {currentPassword,newPassword} = req.body
+    const {id} = req.query
+
+    const student = await students.findById(id)
+    const auth = await bcrypt.compare(currentPassword, student.password)
+    if(auth){
+      student.password = newPassword
+      student.save()
+      return res.status(200).json({ message: 'Password changed successfully', updated: true })
+    }else{
+      return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal Server Error' })
   }
 }

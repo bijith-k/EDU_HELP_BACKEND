@@ -10,7 +10,7 @@ const { allSubjects } = require('../controller/subjectController');
 const { addEvent, getEvents } = require('../controller/eventController');
 const { getPlans } = require('../controller/planController');
 const { getTutors } = require('../controller/tutorController');
-const { planPayment, verifyPayment, planDetails, updateProfile } = require('../controller/studentController');
+const { planPayment, verifyPayment, planDetails, updateProfile, getUploadsCounts, getSubscribedPlan, changePassword } = require('../controller/studentController');
 const { newConversation, getConversation } = require('../controller/conversationController');
 const { newMessage, getMessage } = require('../controller/messageController');
 
@@ -31,7 +31,9 @@ router.get('/get-tutors',verifyStudent,getTutors)
 router.get('/boards',verifyStudent,allBoards)
 router.get('/branches',verifyStudent,allBranches)
 router.get('/subjects',verifyStudent,allSubjects)
-router.get('/plan-details',verifyStudent,planDetails)
+router.get('/plan-details', verifyStudent, planDetails)
+router.get('/get-subscribed-plan', verifyStudent, getSubscribedPlan)
+router.get('/get-upload-counts',verifyStudent, getUploadsCounts)
 
 router.put('/notes-private-public',verifyStudent,privatePublicNotes)
 router.put('/videos-private-public',verifyStudent,privatePublicVideos)
@@ -42,6 +44,7 @@ router.post('/buy-plan', verifyStudent, planPayment)
 router.post('/verify-payment', verifyStudent, verifyPayment)
 
 router.post('/edit-profile-details',verifyStudent, handleUpload('profilePic'),updateProfile)
+router.post('/change-password',verifyStudent,changePassword)
 
 //message
 router.post('/new-conversation',verifyStudent,newConversation)

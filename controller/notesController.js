@@ -37,14 +37,14 @@ module.exports.getNotes = async(req,res,next) =>{
   try {
 
     const {id} = req.query
-    console.log(id,'nid');
+    
     if(id){
       const note = await notes.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
-      console.log(note,'iiii');
+       
       res.json(note);
     }else{
       const note = await notes.find({listed:true,private:false}).populate('branch','name').populate('subject','name')
-      console.log(note);
+      
     res.json(note);
     }
     
