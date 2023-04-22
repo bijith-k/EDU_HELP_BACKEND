@@ -18,7 +18,7 @@ module.exports.CheckStudent = (req,res,next) =>{
       req.user = student._id
       
       if(student){
-        console.log(('innn'));
+        console.log(student);
         res.json({student,token,status:true})
         // next()
       }

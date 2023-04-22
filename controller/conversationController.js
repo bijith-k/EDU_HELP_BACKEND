@@ -18,9 +18,11 @@ module.exports.newConversation = async (req, res) => {
 
 module.exports.getConversation = async(req,res) =>{
   try {
+    console.log(req.params.userId,"iddddddddddddddd")
     const conversations = await conversation.find({
       members:{$in:[req.params.userId]}
     }) 
+    console.log(conversations,"convv");
     res.status(200).json(conversations)
     
   } catch (error) {

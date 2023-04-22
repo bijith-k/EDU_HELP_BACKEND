@@ -156,3 +156,60 @@ module.exports.planDetails = async (req, res, next) => {
   }
 }
 
+
+module.exports.getStudents = async (req, res, next) => {
+  try {
+    const { id } = req.query
+    console.log(id,"reqid");
+    if (id) {
+      const student = await students.find({ _id: id, blocked: false }).populate('branch', 'name').populate('board', 'name')
+      // console.log(tutor,"lls");
+      res.json(student);
+    } else {
+      const student = await students.find({ blocked: false }).populate('branch', 'name').populate('board', 'name')
+      // console.log(tutor,"lls");
+      res.json(student);
+    }
+
+
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+
+module.exports.updateProfile = async(req,res) =>{
+  try {
+    console.log(req.body);
+    console.log(req.file)
+    const { id } = req.query
+
+
+    let updatedData = {
+      board: req.body.board,
+      branch: req.body.branch,
+      name: req.body.name,
+      email:req.body.email,
+      phone:req.body.phone,
+      school:req.body.school
+    }
+
+    if (req.file) {
+      updatedData.profilePicture = req.file.path.replace("public", "");
+    }
+
+    let updatedProfile = await students.findByIdAndUpdate({ _id: id }, updatedData)
+    let student = await students.findById(id).populate('branch', 'name').populate('board', 'name')
+    if (updatedProfile) {
+      res.json({ message: "Profile is updated successfully",student, updated: true });
+    } else {
+      res.status(500).json({ message: "Error while updating", updated: false });
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", updated: false });
+  }
+}

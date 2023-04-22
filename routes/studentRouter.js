@@ -10,7 +10,7 @@ const { allSubjects } = require('../controller/subjectController');
 const { addEvent, getEvents } = require('../controller/eventController');
 const { getPlans } = require('../controller/planController');
 const { getTutors } = require('../controller/tutorController');
-const { planPayment, verifyPayment, planDetails } = require('../controller/studentController');
+const { planPayment, verifyPayment, planDetails, updateProfile } = require('../controller/studentController');
 const { newConversation, getConversation } = require('../controller/conversationController');
 const { newMessage, getMessage } = require('../controller/messageController');
 
@@ -40,6 +40,8 @@ router.put('/questions-private-public',verifyStudent,privatePublicQuestions)
 
 router.post('/buy-plan', verifyStudent, planPayment)
 router.post('/verify-payment', verifyStudent, verifyPayment)
+
+router.post('/edit-profile-details',verifyStudent, handleUpload('profilePic'),updateProfile)
 
 //message
 router.post('/new-conversation',verifyStudent,newConversation)

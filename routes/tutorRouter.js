@@ -8,6 +8,9 @@ const { allBoards } = require('../controller/boardController');
 const { allBranches } = require('../controller/branchController');
 const { allSubjects } = require('../controller/subjectController');
 const { addEvent } = require('../controller/eventController');
+const { getConversation } = require('../controller/conversationController');
+const { newMessage, getMessage } = require('../controller/messageController');
+const { getStudents } = require('../controller/studentController');
 
 
 const router = require('express').Router()
@@ -26,6 +29,13 @@ router.post('/upload-question-papers',verifyTutor,handleUpload('questions'),ques
 router.post('/upload-videos',verifyTutor,videoUpload)
 router.post('/add-event',verifyTutor,handleUpload('poster'),addEvent)
 
+router.get('/get-students', verifyTutor, getStudents)
+
+
+
+router.get('/get-conversation/:userId', verifyTutor, getConversation)
+router.post('/new-message', verifyTutor, newMessage)
+router.get('/get-message/:conversationId', verifyTutor, getMessage)
 
 
 module.exports = router
