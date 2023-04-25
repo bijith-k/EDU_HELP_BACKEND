@@ -46,9 +46,19 @@ const tutorSchema = new mongoose.Schema({
     type:String,
     required:true
   },
+  profilePicture: {
+    type: String
+  },
   approved:{
     type:Boolean,
     default:'false'
+  },
+  rejected: {
+    type: Boolean,
+    default: 'false'
+  },
+  rejection_reason:{
+    type:String
   },
   blocked:{
     type:Boolean,

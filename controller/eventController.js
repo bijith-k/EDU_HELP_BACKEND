@@ -40,15 +40,15 @@ res.status(500).json({ messge: "Something gone wrong", added: false });
 module.exports.adminAllEvents = async(req,res,next) =>{
   try {
      if(req.query.id){
-      console.log(req.query,'query');
+      
       const {id} = req.query
-      console.log(id,'idddd');
+      
     const event = await events.findOne({_id:id})
      
     res.json(event);
      }else{
-      const event = await events.find()
-      console.log(event);
+      const event = await events.find({rejected:false})
+      
       res.json(event);
      }
    
@@ -81,13 +81,24 @@ res.status(500).json({ message: "Something gone wrong", success: false });
 
 module.exports.adminApproveEvent = async(req,res,next) =>{
   try {
-    console.log('in approve');
+    
     const {event} = req.query
    await events.updateOne({_id:event},{$set:{approved:true,listed:true}})
    res.json({ message: "Event approved successfully", approved: true });
   } catch (error) {
     console.log(error);
 res.status(500).json({ message: "Something gone wrong", approved: false });
+  }
+}
+module.exports.adminRejectEvent = async (req, res, next) => {
+  try {
+
+    const { event } = req.query
+    await events.updateOne({ _id: event }, { $set: { rejected: true } })
+    res.json({ message: "Event rejected successfully", rejected: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", rejected: false });
   }
 }
 

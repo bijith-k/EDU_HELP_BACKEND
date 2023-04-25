@@ -42,6 +42,10 @@ const eventSchema = new mongoose.Schema({
     type:Boolean,
     default:'false'
   },
+  rejected: {
+    type: Boolean,
+    default: 'false'
+  },
   listed:{
     type:Boolean,
     default:'false'

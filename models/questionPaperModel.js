@@ -28,6 +28,17 @@ const questionPaperSchema = new mongoose.Schema({
     type:Boolean,
     default:'false'
   },
+  rejected: {
+    type: Boolean,
+    default: 'false'
+  },
+  rejection_reason: {
+    type: String
+  },
+  exclusive: {
+    type: Boolean,
+    default: 'false'
+  },
   listed:{
     type:Boolean,
     default:'false'

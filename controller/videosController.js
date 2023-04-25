@@ -16,6 +16,7 @@ console.log(req.body);
       subject: req.body.subject,
       video_name: req.body.videoName,
       video_link:req.body.videoLink,
+      exclusive: req.body.exclusive,
       uploadedBy: user,
     });
 
@@ -56,14 +57,14 @@ module.exports.getVideos = async(req,res,next) =>{
 module.exports.adminAllVideos = async(req,res,next) =>{
   try {
     if(req.query.id){
-      console.log(req.query,'query');
+      
       const {id} = req.query
-      console.log(id,'idddd');
+       
     const video = await videos.findOne({_id:id}).populate('branch','name').populate('subject','name').populate('board','name')
     res.json(video);
     }else{
-      const video = await videos.find().populate('branch','name').populate('subject','name').populate('board','name')
-    console.log(video,"ll");
+      const video = await videos.find({rejected:false}).populate('branch','name').populate('subject','name').populate('board','name')
+    
     res.json(video);
      }
   } catch (err) {
@@ -76,13 +77,25 @@ module.exports.adminAllVideos = async(req,res,next) =>{
 
 module.exports.adminApproveVideos = async(req,res,next) =>{
   try {
-    console.log('in approve');
+     
     const {video} = req.query
    await videos.updateOne({_id:video},{$set:{approved:true,listed:true}})
    res.json({ message: "Video is approved successfully", approved: true });
   } catch (error) {
     console.log(error);
 res.status(500).json({ message: "Something gone wrong", approved: false });
+  }
+}
+
+module.exports.adminRejectVideos = async (req, res, next) => {
+  try {
+     
+    const { video } = req.query
+    await videos.updateOne({ _id: video }, { $set: { rejected: true, rejection_reason: req.body.rejectionReason } })
+    res.json({ message: "Video is rejected successfully", rejected: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", rejected: false });
   }
 }
 
@@ -151,5 +164,22 @@ module.exports.privatePublicVideos = async(req,res,next) =>{
   } catch (error) {
     console.log(error);
 res.status(500).json({ message: "Something gone wrong", success: false });
+  }
+}
+
+module.exports.deleteVideos = async (req, res) => {
+  try {
+    const { id } = req.query
+
+    const video = await videos.findById(id)
+    if (!video) {
+      return res.status(404).json({ message: "Video not found" })
+    }
+
+    await videos.deleteOne({ _id: id })
+    res.json({ message: "Video removed successfully" })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", success: false });
   }
 }

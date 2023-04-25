@@ -336,12 +336,21 @@ module.exports.tutorSignup = async (req, res, next) => {
 module.exports.tutorSignin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const tutor = await tutors.findOne({ email });
+    const tutor = await tutors.findOne({ email }).populate('branch', 'name').populate('board', 'name')
     if (tutor) {
       const auth = await bcrypt.compare(password, tutor.password);
       if (auth) {
         const token = createToken(tutor._id);
-        res.json({ messge: "Login successful", created: true, token, tutor });
+        if(tutor.approved){
+          res.json({ messge: "Login successful", created: true, token, tutor });
+        }
+       else if(!tutor.approved && !tutor.rejected){
+          res.json({ messge: "Approval pending", pending: true , tutor });
+        }
+       else if (tutor.rejected) {
+          res.json({ messge: "Application rejected", rejected: true, tutor });
+        }
+        
       } else {
         res.json({ message: "Password is incorrect", created: false });
       }

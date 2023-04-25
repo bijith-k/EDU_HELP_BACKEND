@@ -18,7 +18,7 @@ const key_secret = process.env.SECRET_KEY
 
 module.exports.adminAllStudents = async(req,res,next) => {
   try {
-    const student = await students.find().populate().populate('branch','name').populate('board','name')
+    const student = await students.find().populate('branch','name').populate('board','name')
      console.log(student);
      res.json(student);
   } catch (error) {

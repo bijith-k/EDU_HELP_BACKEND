@@ -1,16 +1,16 @@
-const { notesUpload, adminAllNotes, adminApproveNotes, adminNoteListOrUnList, updateNotes } = require('../controller/notesController');
-const { questionPaperUpload, getQuestionPapers, adminAllQuestionPapers, adminApproveQuestionPaper, adminQuestionPaperListOrUnList, updateQuestionPaper } = require('../controller/questionPaperController');
+const { notesUpload, adminAllNotes, adminApproveNotes, adminNoteListOrUnList, updateNotes, adminRejectNotes } = require('../controller/notesController');
+const { questionPaperUpload, getQuestionPapers, adminAllQuestionPapers, adminApproveQuestionPaper, adminQuestionPaperListOrUnList, updateQuestionPaper, adminRejectQuestionPaper } = require('../controller/questionPaperController');
 const { verifyStudent, verifyAdmin } = require('../middleware/verifyUser');
 const handleUpload = require('../middleware/fileUpload');
 const { CheckStudent } = require('../middleware/checkUser');
-const { addBoard, allBoards, adminAllBoards } = require('../controller/boardController');
-const { addBranch, allBranches, adminAllBranches } = require('../controller/branchController');
-const { addSubject, allSubjects, adminAllSubjects } = require('../controller/subjectController');
-const { adminAllVideos, adminApproveVideos, adminVideoListOrUnList, updateVideos } = require('../controller/videosController');
-const { adminAllEvents, adminEventListOrUnList, adminApproveEvent, updateEvent } = require('../controller/eventController');
+const { addBoard, allBoards, adminAllBoards, updateBoard, adminBoardListOrUnList, boardContentCount } = require('../controller/boardController');
+const { addBranch, allBranches, adminAllBranches, updateBranch, adminBranchListOrUnList } = require('../controller/branchController');
+const { addSubject, allSubjects, adminAllSubjects, updateSubject } = require('../controller/subjectController');
+const { adminAllVideos, adminApproveVideos, adminVideoListOrUnList, updateVideos, adminRejectVideos } = require('../controller/videosController');
+const { adminAllEvents, adminEventListOrUnList, adminApproveEvent, updateEvent, adminRejectEvent } = require('../controller/eventController');
 const { addPlan, adminAllPlans, adminPlanListOrUnList, updatePlans } = require('../controller/planController');
 const { adminAllStudents, adminBlockUnblockStudent } = require('../controller/studentController');
-const { adminAllTutors, adminBlockUnblockTutor } = require('../controller/tutorController');
+const { adminAllTutors, adminBlockUnblockTutor, adminApproveTutor, adminRejectTutor } = require('../controller/tutorController');
 
 
 const router = require('express').Router()
@@ -27,15 +27,22 @@ const router = require('express').Router()
  router.get('/students',verifyAdmin,adminAllStudents)
  router.get('/tutors',verifyAdmin,adminAllTutors)
  router.get('/question-papers',verifyAdmin,adminAllQuestionPapers)
- router.get('/approve-notes',verifyAdmin,adminApproveNotes)
+router.get('/approve-notes', verifyAdmin, adminApproveNotes)
+router.post('/reject-notes', verifyAdmin, adminRejectNotes)
  router.get('/note-list-unlist',verifyAdmin,adminNoteListOrUnList)
- router.get('/approve-videos',verifyAdmin,adminApproveVideos)
+router.get('/approve-videos', verifyAdmin, adminApproveVideos)
+router.post('/reject-videos', verifyAdmin, adminRejectVideos)
  router.get('/video-list-unlist',verifyAdmin,adminVideoListOrUnList)
  router.get('/event-list-unlist',verifyAdmin,adminEventListOrUnList)
  router.get('/plan-list-unlist',verifyAdmin,adminPlanListOrUnList)
- router.get('/approve-question-paper',verifyAdmin,adminApproveQuestionPaper)
- router.get('/approve-event',verifyAdmin,adminApproveEvent)
- router.get('/question-paper-list-unlist',verifyAdmin,adminQuestionPaperListOrUnList)
+router.get('/approve-question-paper', verifyAdmin, adminApproveQuestionPaper)
+router.post('/reject-question-paper', verifyAdmin, adminRejectQuestionPaper)
+router.get('/approve-events', verifyAdmin, adminApproveEvent)
+router.get('/reject-events', verifyAdmin, adminRejectEvent)
+router.get('/question-paper-list-unlist', verifyAdmin, adminQuestionPaperListOrUnList)
+router.put('/board-list-unlist', verifyAdmin, adminBoardListOrUnList)
+router.put('/branch-list-unlist', verifyAdmin, adminBranchListOrUnList)
+router.get('/board-content-count', verifyAdmin,boardContentCount)
 
  
  router.post('/add-board',verifyAdmin,addBoard)
@@ -45,10 +52,14 @@ const router = require('express').Router()
  router.post('/edit-event',verifyAdmin,handleUpload('newPoster'),updateEvent)
  router.post('/edit-plans',verifyAdmin,updatePlans)
  router.post('/add-plan',verifyAdmin,addPlan)
+router.post('/edit-board', verifyAdmin, updateBoard)
+router.post('/edit-branch', verifyAdmin, updateBranch)
+router.post('/edit-subject', verifyAdmin, updateSubject)
 
  router.put('/block-unblock-tutor',verifyAdmin,adminBlockUnblockTutor)
  router.put('/block-unblock-student',verifyAdmin,adminBlockUnblockStudent)
-
+router.put('/approve-tutor', verifyAdmin, adminApproveTutor)
+router.post('/reject-tutor', verifyAdmin, adminRejectTutor)
 
 
 

@@ -62,7 +62,7 @@ module.exports.verifyTutor = (req,res,next) =>{
   // console.log(req.headers);
   
   // const token = req.body.token
-  
+   
   jwt.verify(token,process.env.SECRET,async (err,decodedToken)=>{
     if(err){
       console.log(err);

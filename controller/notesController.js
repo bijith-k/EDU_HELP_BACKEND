@@ -1,11 +1,14 @@
 const notes = require('../models/notesModel')
+const fs = require('fs')
+const path = require('path')
+
 
 
 module.exports.notesUpload = async(req,res,next) =>{
   try {
     console.log("innnnn");
 
-    console.log(req.body,"body");
+    console.log(req.body.exclusive,"body");
     const user = req.user
     console.log(user);
     console.log(req.file);
@@ -18,6 +21,7 @@ console.log(req.body);
       subject: req.body.subject,
       note_name: req.body.noteName,
       file_path: filePath,
+      exclusive: req.body.exclusive,
       uploadedBy: user,
     });
     
@@ -57,15 +61,15 @@ module.exports.getNotes = async(req,res,next) =>{
 module.exports.adminAllNotes = async(req,res,next) =>{
   try {
      if(req.query.id){
-      console.log(req.query,'query');
+      
       const {id} = req.query
-      console.log(id,'idddd');
+       
     const note = await notes.findOne({_id:id}).populate('branch','name').populate('subject','name').populate('board','name')
      
     res.json(note);
      }else{
-      const note = await notes.find().populate('branch','name').populate('subject','name').populate('board','name')
-      console.log(note);
+      const note = await notes.find({rejected:false}).populate('branch','name').populate('subject','name').populate('board','name')
+       
       res.json(note);
      }
    
@@ -84,6 +88,19 @@ module.exports.adminApproveNotes = async(req,res,next) =>{
   } catch (error) {
     console.log(error);
 res.status(500).json({ message: "Something gone wrong", approved: false });
+  }
+}
+
+module.exports.adminRejectNotes = async (req, res, next) => {
+  try {
+    
+    const { note } = req.query
+   
+    await notes.updateOne({ _id: note }, { $set: { rejected: true, rejection_reason: req.body.rejectionReason } })
+    res.json({ message: "Note is rejected successfully", rejected: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", rejected: false });
   }
 }
 
@@ -160,3 +177,28 @@ res.status(500).json({ message: "Something gone wrong", success: false });
   }
 }
 
+
+
+module.exports.deleteNotes = async (req, res) => {
+  try {
+    const { id } = req.query
+
+    const note = await notes.findById(id)
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" })
+    }
+
+    const filePath = path.join(__dirname, "../public", note.file_path)
+    fs.unlinkSync(filePath)
+
+    await notes.deleteOne({ _id: id })
+    res.json({ message: "Note removed successfully" })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", success: false });
+  }
+}
+
+
+
+ 

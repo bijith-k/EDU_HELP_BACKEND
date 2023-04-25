@@ -1,5 +1,6 @@
 const questionPapers = require('../models/questionPaperModel')
-// const { ObjectId } = require('mongodb')
+const fs = require('fs')
+const path = require('path')
 
 
 
@@ -20,6 +21,7 @@ console.log(req.body);
       subject: req.body.subject,
       exam_name: req.body.examName,
       file_path: filePath,
+      exclusive:req.body.exclusive,
       uploadedBy: user,
     });
 
@@ -62,8 +64,8 @@ module.exports.adminAllQuestionPapers = async(req,res,next) =>{
       const questions = await questionPapers.findOne({_id:id}).populate('branch','name').populate('subject','name').populate('board','name')
       res.json(questions)
     }else{
-      const questions = await questionPapers.find().populate('branch','name').populate('subject','name').populate('board','name')
-    console.log(questions);
+      const questions = await questionPapers.find({rejected:false}).populate('branch','name').populate('subject','name').populate('board','name')
+    
     res.json(questions);
     }
   } catch (err) {
@@ -76,13 +78,26 @@ module.exports.adminAllQuestionPapers = async(req,res,next) =>{
 
 module.exports.adminApproveQuestionPaper = async(req,res,next) =>{
   try {
-    console.log('in approve');
+     
     const {question} = req.query
    await questionPapers.updateOne({_id:question},{$set:{approved:true,listed:true}})
    res.json({ message: "Question Paper approved successfully", approved: true });
   } catch (error) {
     console.log(error);
 res.status(500).json({ message: "Something gone wrong", approved: false });
+  }
+}
+
+module.exports.adminRejectQuestionPaper = async (req, res, next) => {
+  try {
+
+    const { question } = req.query
+     
+    await questionPapers.updateOne({ _id: question }, { $set: { rejected: true, rejection_reason: req.body.rejectionReason } })
+    res.json({ message: "Question Paper rejected successfully", rejected: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", rejected: false });
   }
 }
 
@@ -154,5 +169,26 @@ module.exports.privatePublicQuestions = async(req,res,next) =>{
   } catch (error) {
     console.log(error);
 res.status(500).json({ message: "Something gone wrong", success: false });
+  }
+}
+
+
+module.exports.deleteQuestionPaper = async(req,res) => {
+  try {
+    const {id} = req.query
+
+    const questionPaper = await questionPapers.findById(id)
+    if(!questionPaper){
+      return res.status(404).json({message:"Question paper not found"})
+    }
+
+    const filePath = path.join(__dirname,"../public",questionPaper.file_path)
+    fs.unlinkSync(filePath)
+
+    await questionPapers.deleteOne({_id:id})
+    res.json({message:"Question paper removed successfully"})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", success: false });
   }
 }

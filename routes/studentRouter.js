@@ -1,9 +1,9 @@
-const { notesUpload, getNotes, privatePublicNotes } = require('../controller/notesController');
-const { questionPaperUpload, getQuestionPapers, privatePublicQuestions } = require('../controller/questionPaperController');
+const { notesUpload, getNotes, privatePublicNotes, deleteNotes } = require('../controller/notesController');
+const { questionPaperUpload, getQuestionPapers, privatePublicQuestions, deleteQuestionPaper } = require('../controller/questionPaperController');
 const { verifyStudent } = require('../middleware/verifyUser');
 const handleUpload = require('../middleware/fileUpload');
 const { CheckStudent } = require('../middleware/checkUser');
-const { videoUpload, getVideos, privatePublicVideos } = require('../controller/videosController');
+const { videoUpload, getVideos, privatePublicVideos, deleteVideos } = require('../controller/videosController');
 const { allBoards } = require('../controller/boardController');
 const { allBranches } = require('../controller/branchController');
 const { allSubjects } = require('../controller/subjectController');
@@ -51,5 +51,9 @@ router.post('/new-conversation',verifyStudent,newConversation)
 router.get('/get-conversation/:userId', verifyStudent,getConversation)
 router.post('/new-message',verifyStudent,newMessage)
 router.get('/get-message/:conversationId',verifyStudent, getMessage)
+
+router.delete('/delete-questions', verifyStudent, deleteQuestionPaper)
+router.delete('/delete-notes',verifyStudent,deleteNotes)
+router.delete('/delete-videos', verifyStudent, deleteVideos)
 
 module.exports = router;
