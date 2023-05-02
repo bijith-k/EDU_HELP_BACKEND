@@ -53,7 +53,7 @@ module.exports.adminAllEvents = async(req,res,next) =>{
      }
    
   } catch (err) {
-    console.error(err);
+    console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 }

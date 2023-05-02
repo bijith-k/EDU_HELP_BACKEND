@@ -1,4 +1,5 @@
 const questionPapers = require('../models/questionPaperModel')
+const students = require('../models/studentModel')
 const fs = require('fs')
 const path = require('path')
 
@@ -27,26 +28,43 @@ console.log(req.body);
 
     await questionPaper.save();
     
-    res.json({ messge: "Question Paper uploaded successfully", uploaded: true });
+    res.json({ message: "Question Paper uploaded successfully", uploaded: true });
 
 
   } catch (error) {
 console.log(error);
-res.status(500).json({ messge: "Something gone wrong", uploaded: false });
+res.status(500).json({ message: "Something gone wrong", uploaded: false });
   }
 }
 
 module.exports.getQuestionPapers = async(req,res,next) =>{
   try {
      const {id} = req.query
-     
+    const { studentId } = req.query
+
      if(id){
       const questions = await questionPapers.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
        
       res.json(questions);
-     }else{
-      const questions = await questionPapers.find({listed:true}).populate('branch','name').populate('subject','name')
-      
+     }
+     else if (studentId) {
+       const student = await students.findById(studentId)
+       if (student.subscription) {
+         const isActive = Date.now() < new Date(student.subscription.expiredAt);
+         if (isActive) {
+           const questions = await questionPapers.find({ listed: true, private: false }).populate('branch', 'name').populate('subject', 'name')
+           res.json(questions);
+         } else {
+           const questions = await questionPapers.find({ listed: true, private: false, exclusive: false }).populate('branch', 'name').populate('subject', 'name')
+           res.json(questions);
+         }
+       } else {
+         const questions = await notes.find({ listed: true, private: false, exclusive: false }).populate('branch', 'name').populate('subject', 'name')
+         res.json(questions);
+       }
+     }
+     else{
+       const questions = await questionPapers.find({listed:true,private:false}).populate('branch','name').populate('subject','name')
       res.json(questions);
      }
     

@@ -25,7 +25,7 @@ const plansSchema = new mongoose.Schema({
     },
     startedAt: {
       type: Date,
-      default: Date.now,
+      
       required: true
     },
     expiredAt: {

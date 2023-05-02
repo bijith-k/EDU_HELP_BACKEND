@@ -29,21 +29,31 @@ let transporter = nodemailer.createTransport({
 });
 
 let sendEmailOTP = (email,otpEmail) => {
-  
-  console.log(otpEmail);
 
-  const mailOptions = {
-    to: email,
-    from: "eduhelp1@outlook.com",
-    subject: "Otp for registration is: ",
-    html:
-      "<h3>OTP for email verification is </h3>" +
-      "<h1 style='font-weight:bold;'>" +
-      otpEmail +
-      "</h1>", // html body
-  };
-  return transporter.sendMail(mailOptions);
-   
+  return new Promise((resolve,reject) => {
+    const mailOptions = {
+      to: email,
+      from: "eduhelp1@outlook.com",
+      subject: "Otp for registration is: ",
+      html:
+        "<h3>OTP for email verification is </h3>" +
+        "<h1 style='font-weight:bold;'>" +
+        otpEmail +
+        "</h1>", // html body
+    }
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        reject({ emailStatus: "error", error: error })
+      } else {
+        console.log("Email sent: " + info.response);
+        resolve({ emailStatus: "success", info: info });
+      }
+    });
+
+  })
+  
 };
 
 let sendPhoneOTP = (phone) => {
@@ -62,11 +72,13 @@ let verifyPhoneOTP = async (phone, otpPhone) => {
     })
     .then((verification_check) => {
       if (verification_check.status === "approved") {
-        return Promise.resolve("OTP verification successful");
+        return Promise.resolve({phoneStatus:"success",});
       } else {
-        return Promise.reject(new Error("OTP verification failed"));
+        return Promise.reject({ phoneStatus:"error"});
       }
-    });
+    }).catch((error)=>{
+      return Promise.reject({ phoneStatus: "error" });
+    })
 };
 
 const createToken = (_id) => {
@@ -94,7 +106,7 @@ const handleErrorT = (err) => {
 
 module.exports.getOtp = async (req, res, next) => {
   try {
-    console.log(req.body);
+    
     const { name, email, phone, branch, board, school, password, place } =
       req.body;
 
@@ -116,29 +128,74 @@ module.exports.getOtp = async (req, res, next) => {
       const otpEmail = Math.floor(1000 + Math.random() * 9000);
       otp = otpEmail;
 
+      // let info = await sendEmailOTP(email, otpEmail)
+
+      // if (info.emailStatus === "success"){
+        let phoneOtp = await sendPhoneOTP(phone);
+
+       
+        if(phoneOtp.status === 'pending'){
+          res
+            .status(200)
+            .json({
+              message: "OTP is sent to given phone number",
+              otpSend: true,
+            });
+        }else{
+          res
+          .status(200)
+          .json({
+            message: "Error while sending otp,please try again",
+            otpSend: false,
+          });
+        }
+        
+      // }
+      // else{
+      //   res
+      //     .status(200)
+      //     .json({
+      //       message: "Error while sending otp,please try again",
+      //       otpSend: false,
+      //     });
+      // }
+
+     
       
-      sendEmailOTP(email,otpEmail)
-        .then((info) => {
-          console.log(`Message sent: ${info.messageId}`);
-          console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-        })
-        .catch((error) => {
-          throw error;
-        });
-      sendPhoneOTP(phone)
-        .then((verification) => {
-          console.log(`OTP sent to ${verification.to} `);
-        })
-        .catch((error) => {
-          throw error;
-        });
       
-      res
-        .status(200)
-        .json({
-          message: "OTP is send to given email and phone number",
-          otpSend: true,
-        });
+      // sendEmailOTP(email,otpEmail)
+      //   .then((info) => {
+      //     console.log(`Message sent: ${info.messageId}`);
+      //     console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+      //   })
+      //   .catch((error) => {
+      //     throw error;
+      //   });
+      // sendPhoneOTP(phone)
+      //   .then((verification) => {
+      //     console.log(`OTP sent to ${verification.to} `);
+      //   })
+      //   .catch((error) => {
+      //     throw error;
+      //   });
+
+      // if (info.status === "success" && phoneOtp.status === "pending"){
+      //   res
+      //     .status(200)
+      //     .json({
+      //       message: "OTP is sent to given email and phone number",
+      //       otpSend: true,
+      //     });
+      // }else{
+      //   res
+      //     .status(200)
+      //     .json({
+      //       message: "Error while sending otp,please try again",
+      //       otpSend: false,
+      //     });
+      // }
+      
+      
     } else {
       res
         .status(200)
@@ -155,55 +212,45 @@ module.exports.getOtp = async (req, res, next) => {
 };
 
 module.exports.signup = async (req, res, next) => {
-  console.log("inn");
+   
   
   const { name, email, phone, branch, board, school, password, place } = signupData;
-  const { otpPhone, otpEmail } = req.body;
+  const { otpPhone } = req.body;
 
   try {
-    if (otpEmail == otp) {
-      console.log("in that");
-      verifyPhoneOTP(phone, otpPhone)
-        .then(async () => {
-          console.log("OTP verification successful");
-          const student = await students.create({
-            name,
-            email,
-            phone,
-            branch,
-            board,
-            school,
-            password,
-            place,
-          });
+    
+     let phoneVerify = await verifyPhoneOTP(phone, otpPhone)
+      
 
-          res
-            .status(200)
-            .json({ message: "Successfully registered", created: true });
-        })
-        .catch((error) => {
-          console.log(error);
-          res
-            .status(200)
-            .json({
-              message: "Entered OTP from mobile is incorrect",
-              created: false,
-            });
-           
-        });
-       
-    } else {
-      res
-        .status(200)
-        .json({
-          message: "Entered OTP from email is incorrect",
-          created: false,
-        });
-    }
+     if(phoneVerify.phoneStatus==="success"){
+       const student = await students.create({
+         name,
+         email,
+         phone,
+         branch,
+         board,
+         school,
+         password,
+         place,
+       });
+
+       res
+         .status(200)
+         .json({ message: "Successfully registered", created: true });
+
+     } else {
+        
+       res.status(400).json({ message: "Incorrect OTP", created: false });
+     } 
+        
   } catch (error) {
-    console.log(error, "kkk");
-    let errors = handleError(error);
-    res.status(400).json({ errors, created: false });
+    console.log(error,"er")
+     if(error.phoneStatus === 'error'){
+       res.status(400).json({ errors: "Entered OTP is incorrect", created: false });
+     }else{
+      let errors = handleError(error);
+      res.status(400).json({ errors, created: false });
+     }
   }
 };
 
@@ -212,13 +259,16 @@ module.exports.signin = async (req, res, next) => {
     const { email, password } = req.body;
     const student = await students.findOne({ email })
     if (student) {
-      
-      const auth = await bcrypt.compare(password, student.password);
-      if (auth) {
-        const token = createToken(student._id);
-        res.json({ messge: "Login successful", created: true, token, student });
-      } else {
-        res.json({ message: "Password is incorrect", created: false });
+      if(student.blocked){
+        res.json({ message: "Your account is blocked by the admin", created: false });
+      }else{
+        const auth = await bcrypt.compare(password, student.password);
+        if (auth) {
+          const token = createToken(student._id);
+          res.json({ message: "Login successful", created: true, token, student });
+        } else {
+          res.json({ message: "Password is incorrect", created: false });
+        }
       }
     } else {
       res.json({
@@ -234,7 +284,7 @@ module.exports.signin = async (req, res, next) => {
 
 module.exports.getTutorOtp = async (req,res,next) => {
   try {
-    console.log(req.body);
+    
     const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch} = req.body;
 
     const tutor = await tutors.findOne({ email });
@@ -243,30 +293,60 @@ module.exports.getTutorOtp = async (req,res,next) => {
       tutorSignupData = { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch}
 
       const otpEmail = Math.floor(1000 + Math.random() * 9000);
-  otpTutor = otpEmail;
+      otpTutor = otpEmail;
 
-      sendEmailOTP(email,otpEmail)
-        .then((info) => {
-          console.log(`Message sent: ${info.messageId}`);
-          console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-        })
-        .catch((error) => {
-          throw error;
-        });
-      sendPhoneOTP(phone)
-        .then((verification) => {
-          console.log(`OTP sent to ${verification.to} `);
-        })
-        .catch((error) => {
-          throw error;
-        });
+      // let info = await sendEmailOTP(email, otpEmail)
+
+      // if (info.emailStatus === "success") {
+        let phoneOtp = await sendPhoneOTP(phone);
+    
+        if(phoneOtp.status === "pending"){
+        res
+          .status(200)
+          .json({
+            message: "OTP is sent to given phone number",
+            otpSend: true,
+          });
+      } else {
+        res
+          .status(200)
+          .json({
+            message: "Error while sending otp,please try again",
+            otpSend: false,
+          });
+      }
+
+      // sendEmailOTP(email,otpEmail)
+      //   .then((info) => {
+      //     console.log(`Message sent: ${info.messageId}`);
+      //     console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+      //   })
+      //   .catch((error) => {
+      //     throw error;
+      //   });
+      // sendPhoneOTP(phone)
+      //   .then((verification) => {
+      //     console.log(`OTP sent to ${verification.to} `);
+      //   })
+      //   .catch((error) => {
+      //     throw error;
+      //   });
       
-      res
-        .status(200)
-        .json({
-          message: "OTP is send to given email and phone number",
-          otpSend: true,
-        });
+      // if (info.emailStatus === "success" && phoneOtp.status === "pending") {
+      //   res
+      //     .status(200)
+      //     .json({
+      //       message: "OTP is sent to given email and phone number",
+      //       otpSend: true,
+      //     });
+      // } else {
+      //   res
+      //     .status(200)
+      //     .json({
+      //       message: "Error while sending otp,please try again",
+      //       otpSend: false,
+      //     });
+      // }
     }else {
       res
         .status(200)
@@ -284,14 +364,13 @@ module.exports.getTutorOtp = async (req,res,next) => {
 module.exports.tutorSignup = async (req, res, next) => {
   
   const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch} = tutorSignupData;
-  const { otpPhone, otpEmail } = req.body;
+  const { otpPhone } = req.body;
   try {
 
-    if(otpEmail == otpTutor){
-      console.log("innnnn");
-
-      verifyPhoneOTP(phone,otpPhone).then(async()=>{
-        console.log('otp verified');
+    
+    let phoneVerify = await verifyPhoneOTP(phone,otpPhone) 
+       
+    if(phoneVerify.phoneStatus === "success"){
         const tutor = await tutors.create({
           name,
           email,
@@ -307,29 +386,29 @@ module.exports.tutorSignup = async (req, res, next) => {
         });
     res.status(200).json({ message: "Successfully registered", created: true });
 
-      }).catch((error)=>{
-        console.log(error);
-        res
-            .status(200)
+      }else{
+       
+        res.status(200)
             .json({
-              message: "Entered OTP from mobile is incorrect",
+              message: "Entered OTP  is incorrect",
               created: false,
             });
-      })
-
-    }else{
-      res
-        .status(200)
-        .json({
-          message: "Entered OTP from email is incorrect",
-          created: false,
-        });
-    }
+      }
 
   } catch (error) {
     console.log(error,"tutorr");
-    const errors = handleErrorT(error);
-    res.status(400).json({ errors, created: false });
+    if(error.phoneStatus === "error"){
+      res
+        .status(200)
+        .json({
+          message: "Entered OTP is incorrect",
+          created: false,
+        });
+    }else{
+      const errors = handleErrorT(error);
+      res.status(400).json({ errors, created: false });
+    }
+    
   }
 };
 
@@ -338,22 +417,27 @@ module.exports.tutorSignin = async (req, res, next) => {
     const { email, password } = req.body;
     const tutor = await tutors.findOne({ email }).populate('branch', 'name').populate('board', 'name')
     if (tutor) {
-      const auth = await bcrypt.compare(password, tutor.password);
-      if (auth) {
-        const token = createToken(tutor._id);
-        if(tutor.approved){
-          res.json({ messge: "Login successful", created: true, token, tutor });
+      if(tutor.blocked){
+        res.json({ message: "Your account is blocked by admin", created: false });
+      }else{
+        const auth = await bcrypt.compare(password, tutor.password);
+        if (auth) {
+          const token = createToken(tutor._id);
+          if (tutor.approved) {
+            res.json({ message: "Login successful", created: true, token, tutor });
+          }
+          else if (!tutor.approved && !tutor.rejected) {
+            res.json({ message: "Approval pending", pending: true, tutor, token });
+          }
+          else if (tutor.rejected) {
+            res.json({ message: "Application rejected", rejected: true, tutor, token });
+          }
+
+        } else {
+          res.json({ message: "Password is incorrect", created: false });
         }
-       else if(!tutor.approved && !tutor.rejected){
-          res.json({ messge: "Approval pending", pending: true , tutor });
-        }
-       else if (tutor.rejected) {
-          res.json({ messge: "Application rejected", rejected: true, tutor });
-        }
-        
-      } else {
-        res.json({ message: "Password is incorrect", created: false });
       }
+      
     } else {
       res.json({ message: "No tutor with the entered email", created: false });
     }
@@ -372,7 +456,7 @@ module.exports.adminSignin = async (req, res, next) => {
       const auth = await bcrypt.compare(password, admin.password);
       if (auth) {
         const token = createToken(admin._id);
-        res.json({ messge: "Login successful", created: true, token,admin });
+        res.json({ message: "Login successful", created: true, token,admin });
       } else {
         res.json({ message: "Password is incorrect", created: false });
       }

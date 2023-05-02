@@ -1,5 +1,48 @@
 const tutors = require('../models/tutorModel')
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+
+
+
+let otpPassword = null;
+
+let transporter = nodemailer.createTransport({
+  host: "smtp.office365.com",
+  port: 587,
+
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
+
+let sendChangePasswordOtp = (email, otp) => {
+
+  return new Promise((resolve, reject) => {
+    const mailOptions = {
+      to: email,
+      from: "eduhelp1@outlook.com",
+      subject: "OTP for changing password ",
+      html:
+        "<h3>OTP for changing your password is </h3>" +
+        "<h1 style='font-weight:bold;'>" +
+        otp +
+        "</h1>", // html body
+    }
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        reject({ emailStatus: "error", error: error })
+      } else {
+        console.log("Email sent: " + info.response);
+        resolve({ emailStatus: "success", info: info });
+      }
+    });
+
+  })
+
+};
 
 
 module.exports.adminAllTutors = async(req,res,next) => {
@@ -38,11 +81,11 @@ module.exports.getTutors = async(req,res,next) =>{
   try {
       const {id} = req.query
       if(id){
-        const tutor = await tutors.find({_id:id, blocked: false }).populate('branch', 'name').populate('board', 'name')
+        const tutor = await tutors.find({_id:id, blocked: false,rejected:false,approved:true }).populate('branch', 'name').populate('board', 'name')
         // console.log(tutor,"lls");
         res.json(tutor);
       }else{
-        const tutor = await tutors.find({ blocked: false }).populate('branch', 'name').populate('board', 'name')
+        const tutor = await tutors.find({ blocked: false, rejected: false, approved: true }).populate('branch', 'name').populate('board', 'name')
         // console.log(tutor,"lls");
         res.json(tutor);
       }
@@ -116,29 +159,33 @@ module.exports.changePassword = async (req, res) => {
 }
 
 
-module.exports.adminApproveTutor = async (req, res, next) => {
+
+
+module.exports.passwordChangeOtp = async (req, res) => {
   try {
-    const { tutor } = req.query
-     
-    await tutors.updateOne({_id:tutor},{$set:{approved:true}})
-    res.json({ message: 'Tutor is successfully approved', approved: true })
+    const email = req.body.email
+
+    otpPassword = Math.floor(1000 + Math.random() * 9000);
+    console.log(otpPassword, "otp")
+    let info = await sendChangePasswordOtp(email, otpPassword)
+    if (info.emailStatus === "success") {
+      res
+        .status(200)
+        .json({
+          message: "OTP is sent to given mail id",
+          otpSend: true,
+        });
+    } else {
+      res
+        .status(200)
+        .json({
+          message: "Error while sending otp,please try again",
+          otpSend: false,
+        });
+    }
 
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Something gone wrong", approved: false });
-  }
-}
-
-module.exports.adminRejectTutor = async (req, res, next) => {
-  try {
-    const { tutor } = req.query
-     
-    
-    await tutors.updateOne({ _id: tutor }, { $set: { rejected: true, rejection_reason:req.body.rejectionReason } })
-    res.json({ message: 'Tutor is rejected successfully', rejected: true })
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Something gone wrong", rejected: false });
+    res.status(500).json({ message: 'Internal Server Error' })
   }
 }

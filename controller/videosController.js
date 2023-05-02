@@ -1,5 +1,6 @@
 
 const videos = require('../models/videosModel')
+const students = require('../models/studentModel')
 
 
 module.exports.videoUpload = async(req,res,next) =>{
@@ -22,12 +23,12 @@ console.log(req.body);
 
     await video.save();
     
-    res.json({ messge: "Video uploaded successfully", uploaded: true });
+    res.json({ message: "Video uploaded successfully", uploaded: true });
 
 
   } catch (error) {
 console.log(error);
-res.status(500).json({ messge: "Something gone wrong", uploaded: false });
+res.status(500).json({ message: "Something gone wrong", uploaded: false });
   }
 }
 
@@ -35,11 +36,27 @@ res.status(500).json({ messge: "Something gone wrong", uploaded: false });
 module.exports.getVideos = async(req,res,next) =>{
   try {
      const {id} = req.query
-     
+    const { studentId } = req.query
+
     if(id){
       const video = await videos.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
       
       res.json(video);
+    } else if (studentId) {
+      const student = await students.findById(studentId)
+      if (student.subscription) {
+        const isActive = Date.now() < new Date(student.subscription.expiredAt);
+        if (isActive) {
+          const video = await videos.find({ listed: true, private: false }).populate('branch', 'name').populate('subject', 'name')
+          res.json(video);
+        } else {
+          const video = await videos.find({ listed: true, private: false, exclusive: false }).populate('branch', 'name').populate('subject', 'name')
+          res.json(video);
+        }
+      } else {
+        const video = await videos.find({ listed: true, private: false, exclusive: false }).populate('branch', 'name').populate('subject', 'name')
+        res.json(video);
+      }
     }
     else{
       

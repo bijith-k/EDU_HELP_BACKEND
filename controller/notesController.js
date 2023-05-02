@@ -1,4 +1,5 @@
 const notes = require('../models/notesModel')
+const students = require('../models/studentModel')
 const fs = require('fs')
 const path = require('path')
 
@@ -27,12 +28,12 @@ console.log(req.body);
     
     await note.save();
     
-    res.json({ messge: "Note uploaded successfully", uploaded: true });
+    res.json({ message: "Note uploaded successfully", uploaded: true });
 
 
   } catch (error) {
 console.log(error);
-res.status(500).json({ messge: "Something gone wrong", uploaded: false });
+res.status(500).json({ message: "Something gone wrong", uploaded: false });
   }
 }
 
@@ -41,14 +42,30 @@ module.exports.getNotes = async(req,res,next) =>{
   try {
 
     const {id} = req.query
+    const { studentId } = req.query
     
+
     if(id){
       const note = await notes.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
-       
       res.json(note);
-    }else{
+    }else if(studentId){
+      const student = await students.findById(studentId) 
+      if (student.subscription) {
+        const isActive = Date.now() < new Date(student.subscription.expiredAt);
+        if (isActive) {
+          const note = await notes.find({ listed: true, private: false }).populate('branch', 'name').populate('subject', 'name')
+          res.json(note);
+        } else {
+          const note = await notes.find({ listed: true, private: false,exclusive:false }).populate('branch', 'name').populate('subject', 'name')
+          res.json(note);
+        }
+      }else{
+        const note = await notes.find({ listed: true, private: false, exclusive: false }).populate('branch', 'name').populate('subject', 'name')
+        res.json(note);
+      }
+    }
+    else{
       const note = await notes.find({listed:true,private:false}).populate('branch','name').populate('subject','name')
-      
     res.json(note);
     }
     

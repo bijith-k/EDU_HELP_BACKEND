@@ -2,6 +2,8 @@ const { signup, signin, tutorSignup, tutorSignin, getOtp, getTutorOtp, adminSign
 
 const router = require('express').Router()
 
+router.get('/boards', boards)
+router.get('/branches', branches)
 
 router.post('/signup',getOtp)
 router.post('/verify-otp',signup)
@@ -10,12 +12,6 @@ router.post('/tutor-signup',getTutorOtp)
 router.post('/verify-tutor-otp',tutorSignup)
 router.post('/tutor-signin',tutorSignin)
 router.post('/admin-signin',adminSignin)
-router.get('/boards',boards)
-router.get('/branches',branches)
-
-
-
-
 
 
 

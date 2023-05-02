@@ -6,13 +6,55 @@ const notes = require('../models/notesModel')
 const videos = require('../models/videosModel')
 const questionPapers = require('../models/questionPaperModel')
 const bcrypt = require("bcrypt");
-
-
-
-
+const nodemailer = require("nodemailer");
 
 const key_id = process.env.KEY_ID
 const key_secret = process.env.SECRET_KEY
+
+
+let otpPassword = null;
+
+let transporter = nodemailer.createTransport({
+  host: "smtp.office365.com",
+  port: 587,
+
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
+
+let sendChangePasswordOtp = (email, otp) => {
+
+  return new Promise((resolve, reject) => {
+    const mailOptions = {
+      to: email,
+      from: "eduhelp1@outlook.com",
+      subject: "OTP for changing password ",
+      html:
+        "<h3>OTP for changing your password is </h3>" +
+        "<h1 style='font-weight:bold;'>" +
+        otp +
+        "</h1>", // html body
+    }
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        reject({ emailStatus: "error", error: error })
+      } else {
+        console.log("Email sent: " + info.response);
+        resolve({ emailStatus: "success", info: info });
+      }
+    });
+
+  })
+
+};
+
+
+
+
 
 
 
@@ -267,19 +309,28 @@ module.exports.getSubscribedPlan = async (req, res, next) => {
 }
 
 
-module.exports.changePassword = async(req,res) =>{
-  try {
-    const {currentPassword,newPassword} = req.body
-    const {id} = req.query
 
-    const student = await students.findById(id)
-    const auth = await bcrypt.compare(currentPassword, student.password)
-    if(auth){
-      student.password = newPassword
-      student.save()
-      return res.status(200).json({ message: 'Password changed successfully', updated: true })
+module.exports.passwordChangeOtp = async (req, res) => {
+  try {
+    const email = req.body.email
+
+    otpPassword = Math.floor(1000 + Math.random() * 9000);
+    console.log(otpPassword,"otp")
+    let info = await sendChangePasswordOtp(email,otpPassword)
+    if(info.emailStatus === "success"){
+    res
+      .status(200)
+      .json({
+        message: "OTP is sent to given mail id",
+        otpSend: true,
+      });
     }else{
-      return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
+      res
+        .status(200)
+        .json({
+          message: "Error while sending otp,please try again",
+          otpSend: false,
+        });
     }
 
   } catch (error) {
@@ -287,3 +338,30 @@ module.exports.changePassword = async(req,res) =>{
     res.status(500).json({ message: 'Internal Server Error' })
   }
 }
+
+module.exports.changePassword = async(req,res) =>{
+  try {
+    const {currentPassword,newPassword,otp} = req.body
+    const {id} = req.query
+   
+    if (otp == otpPassword){
+      const student = await students.findById(id)
+      const auth = await bcrypt.compare(currentPassword, student.password)
+      if (auth) {
+        student.password = newPassword
+        student.save()
+        return res.status(200).json({ message: 'Password changed successfully', updated: true })
+      } else {
+        return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
+      }
+    }else{
+      return res.status(200).json({ message: 'Entered otp is incorrect', updated: false })
+    }
+   
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+

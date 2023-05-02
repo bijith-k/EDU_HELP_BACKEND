@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const session = require('express-session');
 const dbConnection = require('./dbConnection/db')
 const cors = require('cors')
 const logger = require('morgan')
@@ -14,6 +13,7 @@ const tutorRouter = require('./routes/tutorRouter')
 
 
 dbConnection()
+
 app.use(
   cors({
     origin : "*",
@@ -21,20 +21,6 @@ app.use(
     credentials:true,
   })
 )
-
-
-
-// app.use(session({
-//   secret: 'secret_key',
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: { maxAge: 60 * 60 * 24 * 1 * 1000 }
-// }));
-
-
- 
-
-
 
 
 app.use(cookieParser())

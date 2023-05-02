@@ -11,28 +11,29 @@ const { addEvent } = require('../controller/eventController');
 const { getConversation } = require('../controller/conversationController');
 const { newMessage, getMessage } = require('../controller/messageController');
 const { getStudents } = require('../controller/studentController');
-const { updateProfile, changePassword } = require('../controller/tutorController');
-
+const { updateProfile, changePassword, passwordChangeOtp } = require('../controller/tutorController');
 
 const router = require('express').Router()
 
 
-
-router.post('/',CheckTutor)
+router.get('/',CheckTutor)
 router.get('/boards',verifyTutor,allBoards)
 router.get('/branches',verifyTutor,allBranches)
 router.get('/subjects',verifyTutor,allSubjects)
 router.get('/uploaded-notes',verifyTutor,getNotes)
 router.get('/uploaded-videos',verifyTutor,getVideos)
 router.get('/uploaded-questions',verifyTutor,getQuestionPapers)
+router.get('/get-students', verifyTutor, getStudents)
+
+
 router.post('/upload-notes',verifyTutor,handleUpload('note'),notesUpload)
 router.post('/upload-question-papers',verifyTutor,handleUpload('questions'),questionPaperUpload)
 router.post('/upload-videos',verifyTutor,videoUpload)
-router.post('/add-event',verifyTutor,handleUpload('poster'),addEvent)
+router.post('/add-event',verifyTutor,handleUpload('poste'),addEvent)
 router.post('/edit-profile-details', verifyTutor,handleUpload('profilePic'), updateProfile)
-
-router.get('/get-students', verifyTutor, getStudents)
+router.post('/get-password-change-otp', verifyTutor, passwordChangeOtp)
 router.post('/change-password', verifyTutor, changePassword)
+
 
 router.put('/notes-private-public', verifyTutor, privatePublicNotes)
 router.put('/videos-private-public', verifyTutor, privatePublicVideos)
