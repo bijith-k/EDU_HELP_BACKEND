@@ -10,6 +10,7 @@ const studentRouter = require('./routes/studentRouter')
 const authRouter = require('./routes/authRouter')
 const adminRouter = require('./routes/adminRouter')
 const tutorRouter = require('./routes/tutorRouter')
+const socket = require('socket.io')
 
 
 dbConnection()
@@ -41,30 +42,30 @@ const server = app.listen(4000, () => {
   console.log('Server started at PORT 4000');
 })
 
-const io = require("socket.io")(server, {
-  pingTimeout: 60000,
-  cors: {
-    origin: "*",
-    // credentials: true,
-  },
-});
+// const io = require("socket.io")(server, {
+//   pingTimeout: 60000,
+//   cors: {
+//     origin: "*",
+//     // credentials: true,
+//   },
+// });
 
-let users = []
+// let users = []
 
-const addUser=(userId,socketId) =>{
-  !users.some((user)=>user.userId === userId)&&
-  users.push({userId,socketId})
-  // console.log(users,"addd");
-}
+// const addUser=(userId,socketId) =>{
+//   !users.some((user)=>user.userId === userId)&&
+//   users.push({userId,socketId})
+//   // console.log(users,"addd");
+// }
 
-const removeUser = (socketId)=>{
-  users = users.filter(user=>user.socketId !== socketId)
-}
+// const removeUser = (socketId)=>{
+//   users = users.filter(user=>user.socketId !== socketId)
+// }
 
-const getUser = (userId) =>{
-  // console.log(users,"get");
-  return users.find(user => user.userId === userId)
-}
+// const getUser = (userId) =>{
+//   // console.log(users,"get");
+//   return users.find(user => user.userId === userId)
+// }
 
 // io.on("connection", (socket) => {
 //   console.log('a user connected');
@@ -126,3 +127,28 @@ const getUser = (userId) =>{
 
 
 // })
+
+
+
+const io = socket(server,{
+  cors:{
+    origin:"http://localhost:5173",
+    credentials:true,
+  }
+})
+
+global.onlineUsers = new Map()
+
+io.on("connection",(socket)=>{
+  global.chatSocket = socket;
+  socket.on("add-user",(userId)=>{
+    onlineUsers.set(userId,socket.id)
+  })
+
+  socket.on("send-msg",(data)=>{
+    const sendUserSocket = onlineUsers.get(data.receiverId)
+    if(sendUserSocket){
+      socket.to(sendUserSocket).emit("msg-receive",data)
+    }
+  })
+})

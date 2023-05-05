@@ -33,8 +33,6 @@ const studentSchema = new mongoose.Schema({
     },
     startedAt: {
       type: Date,
-      default: Date.now,
-      
     },
     expiredAt: {
       type: Date,

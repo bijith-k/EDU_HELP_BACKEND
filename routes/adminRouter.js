@@ -11,7 +11,7 @@ const { adminAllEvents, adminEventListOrUnList, adminApproveEvent, updateEvent, 
 const { addPlan, adminAllPlans, adminPlanListOrUnList, updatePlans } = require('../controller/planController');
 const { adminAllStudents, adminBlockUnblockStudent } = require('../controller/studentController');
 const { adminAllTutors, adminBlockUnblockTutor } = require('../controller/tutorController');
-const { adminApproveTutor, adminRejectTutor } = require('../controller/adminController');
+const { adminApproveTutor, adminRejectTutor, planCount, monthlySales, activePlans } = require('../controller/adminController');
 
 const router = require('express').Router()
 
@@ -37,6 +37,7 @@ router.get('/approve-events', verifyAdmin, adminApproveEvent)
 router.get('/reject-events', verifyAdmin, adminRejectEvent)
 router.get('/question-paper-list-unlist', verifyAdmin, adminQuestionPaperListOrUnList)
 router.get('/board-content-count', verifyAdmin, boardContentCount)
+router.get('/activePlans',verifyAdmin,activePlans)
 
 
 router.put('/board-list-unlist', verifyAdmin, adminBoardListOrUnList)

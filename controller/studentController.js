@@ -189,6 +189,7 @@ module.exports.planDetails = async (req, res, next) => {
 
     const student = await students.findById(req.user)
     if(student.subscription){
+      console.log(student)
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
       console.log(isActive, "activvvvvvvvv");
       if(isActive){

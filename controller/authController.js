@@ -212,12 +212,10 @@ module.exports.getOtp = async (req, res, next) => {
 };
 
 module.exports.signup = async (req, res, next) => {
-   
   
-  const { name, email, phone, branch, board, school, password, place } = signupData;
-  const { otpPhone } = req.body;
-
   try {
+    const { name, email, phone, branch, board, school, password, place } = signupData;
+    const { otpPhone } = req.body;
     
      let phoneVerify = await verifyPhoneOTP(phone, otpPhone)
       
@@ -363,9 +361,10 @@ module.exports.getTutorOtp = async (req,res,next) => {
 }
 module.exports.tutorSignup = async (req, res, next) => {
   
-  const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch} = tutorSignupData;
-  const { otpPhone } = req.body;
+
   try {
+    const { name, email, phone, subjects, timeFrom, timeTo, profession, password, place, board, branch } = tutorSignupData;
+    const { otpPhone } = req.body;
 
     
     let phoneVerify = await verifyPhoneOTP(phone,otpPhone) 

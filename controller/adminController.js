@@ -1,5 +1,6 @@
 const tutors = require('../models/tutorModel')
 const nodemailer = require("nodemailer");
+const plans = require('../models/plansModel')
 
 
 
@@ -107,5 +108,38 @@ module.exports.adminRejectTutor = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something gone wrong", rejected: false });
+  }
+}
+
+
+
+module.exports.activePlans = async(req,res) => {
+  try {
+
+    const plan = await plans.aggregate([
+      {
+        $unwind: "$used_by"
+      },
+      {
+        $match: {
+          "used_by.expiredAt": { $gte: new Date() }
+        }
+      },
+      {
+        $group: {
+          _id: "$plan",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    
+console.log(plan)
+    res.json({planCount:plan});
+
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong"});
   }
 }

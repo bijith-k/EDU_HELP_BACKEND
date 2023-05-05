@@ -14,11 +14,13 @@ module.exports.verifyStudent = (req,res,next) =>{
   jwt.verify(token,process.env.SECRET,async (err,decodedToken)=>{
     if(err){
       console.log(err);
-      res.json({status:false})
+      res.json({status:false,message:"Error in verification"})
     }else{
       const student = await students.findById({_id:decodedToken._id})
        
-      if(student){
+      if(student.blocked){
+        res.json({ status: false,message:"You are blocked by the admin" })
+      }else{
         req.user = student._id
         req.branch = student.branch
         console.log(('innn'));
