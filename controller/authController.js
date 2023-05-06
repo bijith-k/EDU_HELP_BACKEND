@@ -5,56 +5,19 @@ const boards = require('../models/boardModel')
 const branch = require('../models/branchModel')
 
 const jwt = require("jsonwebtoken");
-const maxAge = 3 * 24 * 60 * 60;
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const service_sid = process.env.TWILIO_SERVICE_SID;
 const client = require("twilio")(accountSid, authToken);
 
 let signupData;
-let otp = null;
 let tutorSignupData;
-let otpTutor = null;
 
-let transporter = nodemailer.createTransport({
-  host: "smtp.office365.com",
-  port: 587,
 
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
-  },
-});
+ 
 
-let sendEmailOTP = (email,otpEmail) => {
 
-  return new Promise((resolve,reject) => {
-    const mailOptions = {
-      to: email,
-      from: "eduhelp1@outlook.com",
-      subject: "Otp for registration is: ",
-      html:
-        "<h3>OTP for email verification is </h3>" +
-        "<h1 style='font-weight:bold;'>" +
-        otpEmail +
-        "</h1>", // html body
-    }
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-        reject({ emailStatus: "error", error: error })
-      } else {
-        console.log("Email sent: " + info.response);
-        resolve({ emailStatus: "success", info: info });
-      }
-    });
-
-  })
-  
-};
 
 let sendPhoneOTP = (phone) => {
   return client.verify.v2.services(service_sid).verifications.create({
@@ -128,9 +91,7 @@ module.exports.getOtp = async (req, res, next) => {
       const otpEmail = Math.floor(1000 + Math.random() * 9000);
       otp = otpEmail;
 
-      // let info = await sendEmailOTP(email, otpEmail)
-
-      // if (info.emailStatus === "success"){
+      
         let phoneOtp = await sendPhoneOTP(phone);
 
        
@@ -150,50 +111,7 @@ module.exports.getOtp = async (req, res, next) => {
           });
         }
         
-      // }
-      // else{
-      //   res
-      //     .status(200)
-      //     .json({
-      //       message: "Error while sending otp,please try again",
-      //       otpSend: false,
-      //     });
-      // }
-
-     
       
-      
-      // sendEmailOTP(email,otpEmail)
-      //   .then((info) => {
-      //     console.log(`Message sent: ${info.messageId}`);
-      //     console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-      //   })
-      //   .catch((error) => {
-      //     throw error;
-      //   });
-      // sendPhoneOTP(phone)
-      //   .then((verification) => {
-      //     console.log(`OTP sent to ${verification.to} `);
-      //   })
-      //   .catch((error) => {
-      //     throw error;
-      //   });
-
-      // if (info.status === "success" && phoneOtp.status === "pending"){
-      //   res
-      //     .status(200)
-      //     .json({
-      //       message: "OTP is sent to given email and phone number",
-      //       otpSend: true,
-      //     });
-      // }else{
-      //   res
-      //     .status(200)
-      //     .json({
-      //       message: "Error while sending otp,please try again",
-      //       otpSend: false,
-      //     });
-      // }
       
       
     } else {
@@ -314,37 +232,7 @@ module.exports.getTutorOtp = async (req,res,next) => {
           });
       }
 
-      // sendEmailOTP(email,otpEmail)
-      //   .then((info) => {
-      //     console.log(`Message sent: ${info.messageId}`);
-      //     console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-      //   })
-      //   .catch((error) => {
-      //     throw error;
-      //   });
-      // sendPhoneOTP(phone)
-      //   .then((verification) => {
-      //     console.log(`OTP sent to ${verification.to} `);
-      //   })
-      //   .catch((error) => {
-      //     throw error;
-      //   });
       
-      // if (info.emailStatus === "success" && phoneOtp.status === "pending") {
-      //   res
-      //     .status(200)
-      //     .json({
-      //       message: "OTP is sent to given email and phone number",
-      //       otpSend: true,
-      //     });
-      // } else {
-      //   res
-      //     .status(200)
-      //     .json({
-      //       message: "Error while sending otp,please try again",
-      //       otpSend: false,
-      //     });
-      // }
     }else {
       res
         .status(200)
@@ -395,7 +283,7 @@ module.exports.tutorSignup = async (req, res, next) => {
       }
 
   } catch (error) {
-    console.log(error,"tutorr");
+    console.log(error);
     if(error.phoneStatus === "error"){
       res
         .status(200)

@@ -61,7 +61,7 @@ let sendChangePasswordOtp = (email, otp) => {
 module.exports.adminAllStudents = async(req,res,next) => {
   try {
     const student = await students.find().populate('branch','name').populate('board','name')
-     console.log(student);
+     
      res.json(student);
   } catch (error) {
     console.error(error);
@@ -76,7 +76,7 @@ module.exports.adminBlockUnblockStudent = async(req,res,next) =>{
     const {student} = req.query
     const studentsToUpdate = await students.findById(student)
     if(studentsToUpdate.blocked){
-      console.log("in");
+    
       await students.updateOne({_id:student},{$set:{blocked:false}})
       res.json({message:'Student is successfully unblocked',success:true})
     }else{
@@ -94,8 +94,7 @@ module.exports.planPayment = async(req,res) =>{
      try {
 
       const plan = await plans.findById(req.body.id)
-
-      console.log(key_id,key_secret,'kkkk');
+ 
 
       const instance = new Razorpay({
         key_id,
@@ -124,28 +123,27 @@ module.exports.planPayment = async(req,res) =>{
 
 module.exports.verifyPayment = async(req,res) => {
   try {
-    // console.log(req.body);
+     
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       plan
     } = req.body
-    console.log(plan,'pp');
+     
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-    console.log(sign);
+    
     const expectedSign = crypto
       .createHmac("sha256", key_secret)
     .update(sign.toString())
     .digest('hex');
-    console.log(expectedSign);
-    console.log(razorpay_signature);
+     
 
     if(razorpay_signature === expectedSign){
       const startDate = new Date()
       const endDate = new Date()
-      console.log(startDate,endDate);
+     
       endDate.setMonth(endDate.getMonth()+ plan.duration)
 
       const selectedPlan = await plans.findById(plan._id)
@@ -189,9 +187,9 @@ module.exports.planDetails = async (req, res, next) => {
 
     const student = await students.findById(req.user)
     if(student.subscription){
-      console.log(student)
+      
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
-      console.log(isActive, "activvvvvvvvv");
+      
       if(isActive){
         return res.status(200).json({ message: 'Active Subscription found', subscribed: isActive })
       }else{
@@ -211,14 +209,14 @@ module.exports.planDetails = async (req, res, next) => {
 module.exports.getStudents = async (req, res, next) => {
   try {
     const { id } = req.query
-    console.log(id,"reqid");
+     
     if (id) {
       const student = await students.find({ _id: id, blocked: false }).populate('branch', 'name').populate('board', 'name')
-      // console.log(tutor,"lls");
+      
       res.json(student);
     } else {
       const student = await students.find({ blocked: false }).populate('branch', 'name').populate('board', 'name')
-      // console.log(tutor,"lls");
+     
       res.json(student);
     }
 
@@ -233,8 +231,7 @@ module.exports.getStudents = async (req, res, next) => {
 
 module.exports.updateProfile = async(req,res) =>{
   try {
-    console.log(req.body);
-    console.log(req.file)
+   
     const { id } = req.query
 
 
@@ -268,7 +265,7 @@ module.exports.updateProfile = async(req,res) =>{
 module.exports.getUploadsCounts = async(req,res) => {
   try {
 
-    const { id } = req.query
+    const  id  = req.user
     const noteCounts = (await notes.find({ uploadedBy: { $in: [id] } })).length
     const videoCounts = (await videos.find({ uploadedBy: { $in: [id] } })).length
     const questionCounts = (await questionPapers.find({ uploadedBy: { $in: [id] } })).length
@@ -286,7 +283,7 @@ module.exports.getUploadsCounts = async(req,res) => {
 module.exports.getSubscribedPlan = async (req, res, next) => {
   try {
      
-    const { id } = req.query
+    const  id  = req.user
 
     const subscribedPlan = await plans.findOne({
       used_by:{
@@ -316,7 +313,7 @@ module.exports.passwordChangeOtp = async (req, res) => {
     const email = req.body.email
 
     otpPassword = Math.floor(1000 + Math.random() * 9000);
-    console.log(otpPassword,"otp")
+     
     let info = await sendChangePasswordOtp(email,otpPassword)
     if(info.emailStatus === "success"){
     res

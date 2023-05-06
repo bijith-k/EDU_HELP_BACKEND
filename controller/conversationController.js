@@ -7,7 +7,7 @@ module.exports.newConversation = async (req, res) => {
 
     const convo = await conversation.findOne({ members: [req.body.senderId, req.body.receiverId]})
     if(convo){
- console.log("first")
+      res.status(200).json({suceess:true})
     }else{
       const newConversation = new conversation({
         members: [req.body.senderId, req.body.receiverId]

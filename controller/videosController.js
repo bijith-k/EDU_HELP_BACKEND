@@ -5,12 +5,9 @@ const students = require('../models/studentModel')
 
 module.exports.videoUpload = async(req,res,next) =>{
   try {
-    console.log("innnnn");
-
-    console.log(req.body,"body");
+     
     const user = req.user
-    console.log(user);
-console.log(req.body);
+   
     const video = new videos({
       board: req.body.board,
       branch: req.body.branch,
@@ -37,13 +34,13 @@ module.exports.getVideos = async(req,res,next) =>{
   try {
      const {id} = req.query
     const { studentId } = req.query
-
+    let user = req.user
     if(id){
-      const video = await videos.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
-      
+     
+      const video = await videos.find({uploadedBy:{$in:[user]}}).populate('branch','name').populate('subject','name')
       res.json(video);
     } else if (studentId) {
-      const student = await students.findById(studentId)
+      const student = await students.findById(user)
       if (student.subscription) {
         const isActive = Date.now() < new Date(student.subscription.expiredAt);
         if (isActive) {
@@ -121,7 +118,7 @@ module.exports.adminVideoListOrUnList = async(req,res,next) =>{
     const {video} = req.query
     const videoToListOrUnList = await videos.findById(video)
     if(videoToListOrUnList.listed){
-      console.log("in");
+      
       await videos.updateOne({_id:video},{$set:{listed:false}})
       res.json({message:'Video is successfully unlisted',success:true})
     }else{
@@ -138,7 +135,7 @@ res.status(500).json({ message: "Something gone wrong", success: false });
 
 module.exports.updateVideos = async(req,res,next) =>{
   try {
-    console.log(req.body);
+    
     const {video} = req.query
 
     let updatedData = {
@@ -167,10 +164,10 @@ res.status(500).json({ message: "Something gone wrong", updated: false });
 module.exports.privatePublicVideos = async(req,res,next) =>{
   try {
     const {id} = req.query
-    console.log('innnnnnnnnnnnnnnnn');
+    
     const videoToUpdate = await videos.findById(id)
     if(videoToUpdate.private){
-      console.log("in");
+     
       await videos.updateOne({_id:id},{$set:{private:false}})
       res.json({message:'Video is successfully made public',success:true})
     }else{

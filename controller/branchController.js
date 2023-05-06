@@ -4,8 +4,7 @@ const branch = require('../models/branchModel')
 
 module.exports.addBranch = async(req,res) => {
   try {
-    console.log('in');
-    console.log(req.body);
+    
     const newBranch = new branch({
       name: req.body.branch,
       board:req.body.board

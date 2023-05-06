@@ -48,7 +48,7 @@ let sendChangePasswordOtp = (email, otp) => {
 module.exports.adminAllTutors = async(req,res,next) => {
   try {
     const tutor = await tutors.find({rejected:false}).populate('branch', 'name').populate('board', 'name')
-     console.log(tutor);
+     
      res.json(tutor);
   } catch (error) {
     console.error(error);
@@ -82,11 +82,11 @@ module.exports.getTutors = async(req,res,next) =>{
       const {id} = req.query
       if(id){
         const tutor = await tutors.find({_id:id, blocked: false,rejected:false,approved:true }).populate('branch', 'name').populate('board', 'name')
-        // console.log(tutor,"lls");
+       
         res.json(tutor);
       }else{
         const tutor = await tutors.find({ blocked: false, rejected: false, approved: true }).populate('branch', 'name').populate('board', 'name')
-        // console.log(tutor,"lls");
+       
         res.json(tutor);
       }
       
@@ -166,7 +166,7 @@ module.exports.passwordChangeOtp = async (req, res) => {
     const email = req.body.email
 
     otpPassword = Math.floor(1000 + Math.random() * 9000);
-    console.log(otpPassword, "otp")
+    
     let info = await sendChangePasswordOtp(email, otpPassword)
     if (info.emailStatus === "success") {
       res

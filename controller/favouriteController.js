@@ -30,7 +30,7 @@ try {
       res.json({ added: true, message: "Selected note is added to favourites" })
     }
   }else{
-    console.log(studentId,noteId)
+    
     let favouriteObj = new favourites({
       student:studentId,
       notes:[noteObj]
@@ -137,7 +137,7 @@ module.exports.addFavouriteVideo = async (req, res, next) => {
 module.exports.getFavouriteNotes = async (req, res, next) => {
   try {
 
-    const { id } = req.query
+    const id  = req.user
 
     const favourite = await favourites.findOne({ student: id }).populate('notes.note')
     const student = await students.findById(id)
@@ -150,6 +150,7 @@ module.exports.getFavouriteNotes = async (req, res, next) => {
       } else {
         const favourites = favourite.notes
         const favouriteNote = favourites.filter((notes)=>notes.note.exclusive == false)
+        
         res.json(favouriteNote);
       }
     } else {
@@ -168,7 +169,7 @@ module.exports.getFavouriteNotes = async (req, res, next) => {
 module.exports.getFavouriteQuestions = async (req, res, next) => {
   try {
 
-    const { id } = req.query
+    const id = req.user
 
     const favourite = await favourites.findOne({ student: id }).populate('questionPaper.question')
     const student = await students.findById(id)
@@ -199,7 +200,7 @@ module.exports.getFavouriteQuestions = async (req, res, next) => {
 module.exports.getFavouriteVideos = async (req, res, next) => {
   try {
 
-    const { id } = req.query
+    const id = req.user
 
     const favourite = await favourites.findOne({ student: id }).populate('videos.video')
     const student = await students.findById(id)

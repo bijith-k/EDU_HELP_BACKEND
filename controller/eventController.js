@@ -3,15 +3,13 @@ const events = require('../models/eventsModel')
 
 module.exports.addEvent = async(req,res,next) => {
 try {
-  console.log('inssss');
-  console.log(req.file);
-  console.log(req.body);
+  
 
   const user = req.user
-  console.log(user);
+ 
   const filePath = req.file.path.replace("public", "");
 
-console.log(req.body);
+ 
   const event = new events({
     name: req.body.name,
     organizer: req.body.organizer,
@@ -64,7 +62,7 @@ module.exports.adminEventListOrUnList = async(req,res,next) =>{
     const {event} = req.query
     const eventToListOrUnList = await events.findById(event)
     if(eventToListOrUnList.listed){
-      console.log("in");
+       
       await events.updateOne({_id:event},{$set:{listed:false}})
       res.json({message:'Event is successfully unlisted',success:true})
     }else{
@@ -104,11 +102,10 @@ module.exports.adminRejectEvent = async (req, res, next) => {
 
 module.exports.updateEvent = async(req,res,next) =>{
   try {
-    console.log(req.body);
-    console.log(req.file);
+    
     
     const {event} = req.query
-console.log(req.body.startingDate);
+ 
      
     const formatDate = (date) =>{
       const [day,month,year] = date.split('/')
@@ -152,15 +149,15 @@ res.status(500).json({ message: "Something gone wrong", updated: false });
 module.exports.getEvents = async(req,res,next) =>{
   try {
      const {id} = req.query
-     console.log(id,'eve');
+      
     if(id){
       const event = await events.find({uploadedBy:{$in:[id]}}) 
-      console.log(event,"ll");
+      
       res.json(event);
     }
     else{
       const event = await events.find({listed:true})
-      console.log(event,"lls");
+       
       res.json(event);
     }
     

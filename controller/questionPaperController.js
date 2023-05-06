@@ -7,15 +7,11 @@ const path = require('path')
 
 module.exports.questionPaperUpload = async(req,res,next) =>{
   try {
-    console.log("innnnn");
-
-    console.log(req.body,"body");
+     
     const user = req.user
-    console.log(user);
-    console.log(req.file);
+   
     const filePath = req.file.path.replace("public", "");
-
-console.log(req.body);
+ 
     const questionPaper = new questionPapers({
       board: req.body.board,
       branch: req.body.branch,
@@ -41,14 +37,15 @@ module.exports.getQuestionPapers = async(req,res,next) =>{
   try {
      const {id} = req.query
     const { studentId } = req.query
-
+    let user = req.user
      if(id){
-      const questions = await questionPapers.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
+      
+      const questions = await questionPapers.find({uploadedBy:{$in:[user]}}).populate('branch','name').populate('subject','name')
        
       res.json(questions);
      }
      else if (studentId) {
-       const student = await students.findById(studentId)
+       const student = await students.findById(user)
        if (student.subscription) {
          const isActive = Date.now() < new Date(student.subscription.expiredAt);
          if (isActive) {
@@ -124,7 +121,7 @@ module.exports.adminQuestionPaperListOrUnList = async(req,res,next) =>{
     const {question} = req.query
     const QuestionToListOrUnList = await questionPapers.findById(question)
     if(QuestionToListOrUnList.listed){
-      console.log("in");
+      
       await questionPapers.updateOne({_id:question},{$set:{listed:false}})
       res.json({message:'Question Paper is successfully unlisted',success:true})
     }else{
@@ -141,7 +138,7 @@ res.status(500).json({ message: "Something gone wrong", success: false });
 
 module.exports.updateQuestionPaper = async(req,res,next) =>{
   try {
-    console.log(req.body);
+    
     const {question} = req.query
 
     let updatedData = {
@@ -173,10 +170,10 @@ res.status(500).json({ message: "Something gone wrong", updated: false });
 module.exports.privatePublicQuestions = async(req,res,next) =>{
   try {
     const {id} = req.query
-    console.log('innnnnnnnnnnnnnnnn');
+     
     const questionToUpdate = await questionPapers.findById(id)
     if(questionToUpdate.private){
-      console.log("in");
+      
       await questionPapers.updateOne({_id:id},{$set:{private:false}})
       res.json({message:'Question Paper is successfully made public',success:true})
     }else{

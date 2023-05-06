@@ -134,7 +134,6 @@ module.exports.activePlans = async(req,res) => {
     ]);
 
     
-console.log(plan)
     res.json({planCount:plan});
 
     

@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
 
     let uploadPath = '';
-    console.log('inside multer');
+    
 
     // Check the input field name to set the upload path
     if (file.fieldname === 'note') {
@@ -43,8 +43,4 @@ function handleUpload(fieldname){
 module.exports = handleUpload;
 
 
-// }
-// catch (err) {
-//   console.log(err,"sf");
-//   res.status(500).json({ messge: "Something gone wrong"});
-// }
+ 

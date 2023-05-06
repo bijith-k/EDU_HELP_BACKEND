@@ -4,11 +4,8 @@ const tutors = require('../models/tutorModel')
 const admins = require('../models/adminModel')
 
 module.exports.CheckStudent = (req,res,next) =>{
-  // console.log(req.body);
-  // const token = req.headers.token
-  // console.log(req.headers);
-  
-  // const token = req.body.token
+   
+   
   try {
     const authHeader = req.headers.authorization
 
@@ -40,9 +37,7 @@ module.exports.CheckStudent = (req,res,next) =>{
 
 
 module.exports.CheckTutor = (req,res,next) =>{
-  // console.log(req.body);
-  // const token = req.headers.token
-  // console.log(req.headers);
+ 
   
   try {
     const authHeader = req.headers.authorization
@@ -78,9 +73,7 @@ module.exports.CheckTutor = (req,res,next) =>{
 }
 
 module.exports.CheckAdmin = (req, res, next) => {
-  // console.log(req.body);
-  // const token = req.headers.token
-  // console.log(req.headers);
+  
 
   try {
     const authHeader = req.headers.authorization

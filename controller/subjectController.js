@@ -6,8 +6,7 @@ const branches = require('../models/branchModel')
 
 module.exports.addSubject = async(req,res) => {
   try {
-    console.log('in');
-    console.log(req.body);
+     
     const newSubject = new subject({
       name: req.body.subject,
       board:req.body.board,
@@ -32,10 +31,10 @@ module.exports.allSubjects = async(req,res,next)=>{
   try {
     
     const {branch} = req.query
-console.log(branch);
+ 
     if (!branch) {
     const subjects = await subject.find({listed:true}).populate('branch','name')
-    console.log(subjects);
+    
     res.json({ status: true, message: "success", subjects })
        
     }else{
@@ -106,5 +105,24 @@ module.exports.updateSubject = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something gone wrong", updated: false });
+  }
+}
+
+module.exports.adminSubjectListOrUnList = async (req, res, next) => {
+  try {
+    const { id } = req.query
+    const subjectToListOrUnList = await subject.findById(id)
+    if (subjectToListOrUnList.listed) {
+
+      await subject.updateOne({ _id: id }, { $set: { listed: false } })
+      res.json({ message: 'Subject is successfully unlisted', success: true })
+    } else {
+      await subject.updateOne({ _id: id }, { $set: { listed: true } })
+      res.json({ message: 'Subject is successfully listed', success: true })
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", success: false });
   }
 }

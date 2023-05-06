@@ -5,7 +5,7 @@ const handleUpload = require('../middleware/fileUpload');
 const { CheckStudent, CheckAdmin } = require('../middleware/checkUser');
 const { addBoard, allBoards, adminAllBoards, updateBoard, adminBoardListOrUnList, boardContentCount } = require('../controller/boardController');
 const { addBranch, allBranches, adminAllBranches, updateBranch, adminBranchListOrUnList } = require('../controller/branchController');
-const { addSubject, allSubjects, adminAllSubjects, updateSubject } = require('../controller/subjectController');
+const { addSubject, allSubjects, adminAllSubjects, updateSubject, adminSubjectListOrUnList } = require('../controller/subjectController');
 const { adminAllVideos, adminApproveVideos, adminVideoListOrUnList, updateVideos, adminRejectVideos } = require('../controller/videosController');
 const { adminAllEvents, adminEventListOrUnList, adminApproveEvent, updateEvent, adminRejectEvent } = require('../controller/eventController');
 const { addPlan, adminAllPlans, adminPlanListOrUnList, updatePlans } = require('../controller/planController');
@@ -42,6 +42,7 @@ router.get('/activePlans',verifyAdmin,activePlans)
 
 router.put('/board-list-unlist', verifyAdmin, adminBoardListOrUnList)
 router.put('/branch-list-unlist', verifyAdmin, adminBranchListOrUnList)
+router.put('/subject-list-unlist', verifyAdmin, adminSubjectListOrUnList)
 router.put('/block-unblock-tutor', verifyAdmin, adminBlockUnblockTutor)
 router.put('/block-unblock-student', verifyAdmin, adminBlockUnblockStudent)
 router.put('/approve-tutor', verifyAdmin, adminApproveTutor)

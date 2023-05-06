@@ -7,15 +7,12 @@ const path = require('path')
 
 module.exports.notesUpload = async(req,res,next) =>{
   try {
-    console.log("innnnn");
-
-    console.log(req.body.exclusive,"body");
+     
     const user = req.user
-    console.log(user);
-    console.log(req.file);
+   
     const filePath = req.file.path.replace("public", "");
 
-console.log(req.body);
+ 
     const note = new notes({
       board: req.body.board,
       branch: req.body.branch,
@@ -43,13 +40,14 @@ module.exports.getNotes = async(req,res,next) =>{
 
     const {id} = req.query
     const { studentId } = req.query
-    
-
+    let user = req.user
+ 
     if(id){
-      const note = await notes.find({uploadedBy:{$in:[id]}}).populate('branch','name').populate('subject','name')
+       
+      const note = await notes.find({uploadedBy:{$in:[user]}}).populate('branch','name').populate('subject','name')
       res.json(note);
     }else if(studentId){
-      const student = await students.findById(studentId) 
+      const student = await students.findById(user) 
       if (student.subscription) {
         const isActive = Date.now() < new Date(student.subscription.expiredAt);
         if (isActive) {
@@ -98,7 +96,7 @@ module.exports.adminAllNotes = async(req,res,next) =>{
 
 module.exports.adminApproveNotes = async(req,res,next) =>{
   try {
-    console.log('in approve');
+    
     const {note} = req.query
    await notes.updateOne({_id:note},{$set:{approved:true,listed:true}})
    res.json({ message: "Note is approved successfully", approved: true });
@@ -126,7 +124,7 @@ module.exports.adminNoteListOrUnList = async(req,res,next) =>{
     const {note} = req.query
     const noteToUpdate = await notes.findById(note)
     if(noteToUpdate.listed){
-      console.log("in");
+       
       await notes.updateOne({_id:note},{$set:{listed:false}})
       res.json({message:'Note is successfully unlisted',success:true})
     }else{
@@ -143,10 +141,10 @@ res.status(500).json({ message: "Something gone wrong", success: false });
 
 module.exports.updateNotes = async(req,res,next) =>{
   try {
-    console.log(req.body);
+     
     const {note} = req.query
 
-    console.log(note,'note');
+   
 
     let updatedData = {
       board:req.body.board,
@@ -177,10 +175,10 @@ res.status(500).json({ message: "Something gone wrong", updated: false });
 module.exports.privatePublicNotes = async(req,res,next) =>{
   try {
     const {id} = req.query
-    console.log('innnnnnnnnnnnnnnnn');
+   
     const noteToUpdate = await notes.findById(id)
     if(noteToUpdate.private){
-      console.log("in");
+       
       await notes.updateOne({_id:id},{$set:{private:false}})
       res.json({message:'Note is successfully made public',success:true})
     }else{
