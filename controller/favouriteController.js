@@ -1,4 +1,4 @@
-const favourites = require('../models/FavouritesModel')
+const favourites = require('../models/favouritesModel')
 const notes = require('../models/notesModel')
 const questions = require('../models/questionPaperModel')
 const videos = require('../models/videosModel')
