@@ -47,7 +47,7 @@ const server = app.listen(4000, () => {
 
 const io = socket(server,{
   cors:{
-    origin:"http://localhost:5173",
+    origin:"https://edu-help.netlify.app",
     credentials:true,
   }
 })
