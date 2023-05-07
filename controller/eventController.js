@@ -8,7 +8,13 @@ try {
   const user = req.user
  
   const filePath = req.file.path.replace("public", "");
+  let link = req.body.link;  
 
+  // Check if the link starts with "http://" or "https://"
+  if (!/^https?:\/\//i.test(link)) {
+    // If it doesn't, prepend "http://" to the link
+    link = "http://" + link;
+  }
  
   const event = new events({
     name: req.body.name,
@@ -17,7 +23,7 @@ try {
     description: req.body.description,
     startingDate: req.body.startingDate,
     endingDate: req.body.endingDate,
-    link: req.body.link,
+    link,
     contact: req.body.contact,
     poster:filePath,
     uploadedBy: user,
@@ -25,11 +31,11 @@ try {
   
   await event.save()
   
-  res.json({ messge: "Event added successfully", added: true });
+  res.json({ message: "Event added successfully", added: true });
 
 } catch (error) {
   console.log(error,'ee');
-res.status(500).json({ messge: "Something gone wrong", added: false });
+res.status(500).json({ message: "Something gone wrong", added: false });
 
 }
 }

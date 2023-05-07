@@ -8,15 +8,18 @@ const storage = multer.diskStorage({
 
     let uploadPath = '';
     
-
+    
     // Check the input field name to set the upload path
     if (file.fieldname === 'note') {
       uploadPath = path.join('public','uploads', 'notes');
-    } else if (file.fieldname === 'question') {
+    } else if (file.fieldname === 'questions') {
       uploadPath = path.join('public','uploads', 'question-papers');
     } else if (file.fieldname === 'poster') {
       uploadPath = path.join('public','uploads', 'events');
-    }else {
+    } else if (file.fieldname === 'profilePic') {
+    uploadPath = path.join('public', 'uploads', 'profilePic');
+    }
+    else {
       uploadPath = path.join('public','uploads');
     }
     cb(null, uploadPath);
