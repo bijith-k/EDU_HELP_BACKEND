@@ -41,7 +41,7 @@ let sendEmail = (name, email, reason) => {
           "<h2 style='font-weight:bold;'>Congratulations!</h2>" +
           "<h3 >Your application to join as a tutor in EDU-HELP is approved.</h3>" +
           "<h3 style='font-weight:bold;'>The team wishing you a happy teaching!</h3>" +
-          "<h4 style='font-weight:bold;'><a href='http://localhost:5173/signin'>Click here <a/>to login to your account </h1>"
+          "<h4 style='font-weight:bold;'><a href='https://edu-help.netlify.app/tutor'>Click here <a/>to login to your account </h1>"
       };
       // return transporter.sendMail(mailOptions);
     }
