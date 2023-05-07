@@ -175,7 +175,7 @@ res.status(500).json({ message: "Something gone wrong", updated: false });
 module.exports.privatePublicNotes = async(req,res,next) =>{
   try {
     const {id} = req.query
-   
+    
     const noteToUpdate = await notes.findById(id)
     if(noteToUpdate.private){
        
@@ -197,14 +197,16 @@ res.status(500).json({ message: "Something gone wrong", success: false });
 module.exports.deleteNotes = async (req, res) => {
   try {
     const { id } = req.query
-
+ 
     const note = await notes.findById(id)
+    console.log(note)
     if (!note) {
       return res.status(404).json({ message: "Note not found" })
     }
 
     const filePath = path.join(__dirname, "../public", note.file_path)
-    fs.unlinkSync(filePath)
+    // fs.unlinkSync(filePath)
+    await fs.promises.unlink(filePath)
 
     await notes.deleteOne({ _id: id })
     res.json({ message: "Note removed successfully" })
