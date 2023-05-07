@@ -141,21 +141,28 @@ module.exports.getFavouriteNotes = async (req, res, next) => {
 
     const favourite = await favourites.findOne({ student: id }).populate('notes.note')
     const student = await students.findById(id)
+
+    let favouriteNote;
+
+    if (!favourite) {
+      favouriteNote = []
+      return res.json(favouriteNote);
+    }
     
     if (student.subscription) {
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
       if (isActive) {
-        const favouriteNote = favourite.notes
+         favouriteNote = favourite.notes
         res.json(favouriteNote);
       } else {
         const favourites = favourite.notes
-        const favouriteNote = favourites.filter((notes)=>notes.note.exclusive == false)
+         favouriteNote = favourites.filter((notes)=>notes.note.exclusive == false)
         
         res.json(favouriteNote);
       }
     } else {
       const favourites = favourite.notes
-      const favouriteNote = favourites.filter((notes) => notes.note.exclusive == false)
+       favouriteNote = favourites.filter((notes) => notes.note.exclusive == false)
       res.json(favouriteNote);
     }
 
@@ -173,20 +180,26 @@ module.exports.getFavouriteQuestions = async (req, res, next) => {
 
     const favourite = await favourites.findOne({ student: id }).populate('questionPaper.question')
     const student = await students.findById(id)
+    let favouriteQuestions;
+
+    if (!favourite) {
+      favouriteQuestions = []
+      return res.json(favouriteQuestions);
+    }
 
     if (student.subscription) {
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
       if (isActive) {
-        const favouriteQuestions = favourite.questionPaper
+         favouriteQuestions = favourite.questionPaper
         res.json(favouriteQuestions);
       } else {
         const favourites = favourite.questionPaper
-        const favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
+         favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
         res.json(favouriteQuestions);
       }
     } else {
       const favourites = favourite.questionPaper
-      const favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
+       favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
       res.json(favouriteQuestions);
     }
 
@@ -203,21 +216,32 @@ module.exports.getFavouriteVideos = async (req, res, next) => {
     const id = req.user
 
     const favourite = await favourites.findOne({ student: id }).populate('videos.video')
+    
     const student = await students.findById(id)
+    let favouriteVideos;
+ 
+    if(!favourite){
+      favouriteVideos = []
+     return res.json(favouriteVideos);
+    }
+   
 
     if (student.subscription) {
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
       if (isActive) {
-        const favouriteVideos = favourite.videos
+        favouriteVideos = favourite.videos
         res.json(favouriteVideos);
       } else {
-        const favourites = favourite.videos
-        const favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
+         
+          const favourites = favourite.videos
+          favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
+        
         res.json(favouriteVideos);
       }
     } else {
+       
       const favourites = favourite.videos
-      const favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
+       favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
       res.json(favouriteVideos);
     }
     

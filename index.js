@@ -12,8 +12,10 @@ const adminRouter = require('./routes/adminRouter')
 const tutorRouter = require('./routes/tutorRouter')
 const socket = require('socket.io')
 
+ 
 
 dbConnection()
+
 
 app.use(
   cors({
@@ -31,7 +33,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(express.static(path.join(__dirname, "public")));
 
-
+ 
 
 app.use("/", studentRouter);
 app.use('/auth',authRouter);
@@ -47,7 +49,8 @@ const server = app.listen(4000, () => {
 
 const io = socket(server,{
   cors:{
-    origin:"https://edu-help.netlify.app",
+    // origin:"http://localhost:5173",
+    origin: "https://edu-help.netlify.app",
     credentials:true,
   }
 })

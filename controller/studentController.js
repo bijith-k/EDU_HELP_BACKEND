@@ -7,12 +7,13 @@ const videos = require('../models/videosModel')
 const questionPapers = require('../models/questionPaperModel')
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const Otp = require('../models/otpModel')
 
 const key_id = process.env.KEY_ID
 const key_secret = process.env.SECRET_KEY
 
 
-let otpPassword = null;
+ 
 
 let transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
@@ -312,8 +313,16 @@ module.exports.passwordChangeOtp = async (req, res) => {
   try {
     const email = req.body.email
 
-    otpPassword = Math.floor(1000 + Math.random() * 9000);
+    const otpPassword = Math.floor(1000 + Math.random() * 9000);
      
+    const otpObj = new Otp({
+      email,
+      otp: otpPassword,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 minutes
+    });
+    await otpObj.save();
+
+
     let info = await sendChangePasswordOtp(email,otpPassword)
     if(info.emailStatus === "success"){
     res
@@ -339,22 +348,34 @@ module.exports.passwordChangeOtp = async (req, res) => {
 
 module.exports.changePassword = async(req,res) =>{
   try {
-    const {currentPassword,newPassword,otp} = req.body
-    const {id} = req.query
+    const {currentPassword,newPassword,otp,email} = req.body
+    const id = req.user
+
+    const otpObj = await Otp.findOne({ email }).sort({ createdAt: -1 });
+
+    if (!otpObj) {
+      return res.status(200).json({ message: 'OTP is not valid or has expired' });
+    }
+    if (otp !== otpObj.otp) {
+      return res.status(200).json({ message: 'Invalid OTP' });
+    }
+    if (otpObj.expiresAt < new Date()) {
+      await otpObj.deleteOne()
+      return res.status(200).json({ message: 'OTP has expired' });
+    }
    
-    if (otp == otpPassword){
+    
       const student = await students.findById(id)
       const auth = await bcrypt.compare(currentPassword, student.password)
       if (auth) {
         student.password = newPassword
-        student.save()
+        await student.save()
+        await otpObj.deleteOne()
         return res.status(200).json({ message: 'Password changed successfully', updated: true })
       } else {
         return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
       }
-    }else{
-      return res.status(200).json({ message: 'Entered otp is incorrect', updated: false })
-    }
+    
    
   } catch (error) {
     console.log(error);

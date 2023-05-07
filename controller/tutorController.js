@@ -1,10 +1,10 @@
 const tutors = require('../models/tutorModel')
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const Otp = require('../models/otpModel')
 
 
-
-let otpPassword = null;
+ 
 
 let transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
@@ -137,36 +137,20 @@ module.exports.updateProfile = async (req, res) => {
 }
 
 
-module.exports.changePassword = async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body
-    const { id } = req.query
-
-    const tutor = await tutors.findById(id)
-    const auth = await bcrypt.compare(currentPassword, tutor.password)
-    if (auth) {
-      tutor.password = newPassword
-      tutor.save()
-      return res.status(200).json({ message: 'Password changed successfully', updated: true })
-    } else {
-      return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
-    }
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: 'Internal Server Error' })
-  }
-}
-
-
-
-
 module.exports.passwordChangeOtp = async (req, res) => {
   try {
     const email = req.body.email
 
-    otpPassword = Math.floor(1000 + Math.random() * 9000);
+    const otpPassword = Math.floor(1000 + Math.random() * 9000);
     
+    const otpObj = new Otp({
+      email,
+      otp: otpPassword,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 minutes
+    });
+    await otpObj.save();
+    
+     
     let info = await sendChangePasswordOtp(email, otpPassword)
     if (info.emailStatus === "success") {
       res
@@ -189,3 +173,45 @@ module.exports.passwordChangeOtp = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' })
   }
 }
+
+module.exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword,otp,email } = req.body
+    const id  = req.user
+
+  
+    const otpObj = await Otp.findOne({ email}).sort({ createdAt: -1 });
+    
+    if (!otpObj) {
+      return res.status(200).json({ message: 'OTP is not valid or has expired' });
+    }
+    if (otp !== otpObj.otp) {
+      return res.status(200).json({ message: 'Invalid OTP' });
+    }
+    if (otpObj.expiresAt < new Date()) {
+      await otpObj.deleteOne()
+      return res.status(200).json({ message: 'OTP has expired' });
+    }
+    
+
+      const tutor = await tutors.findById(id)
+      const auth = await bcrypt.compare(currentPassword, tutor.password)
+      if (auth) {
+        tutor.password = newPassword
+        await tutor.save()
+        await otpObj.deleteOne()
+        return res.status(200).json({ message: 'Password changed successfully', updated: true })
+      } else {
+        return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
+      }
+    
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+
+
+
