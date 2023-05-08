@@ -2,29 +2,29 @@
 const board = require('../models/boardModel')
 
 
-module.exports.addBoard = async(req,res) => {
+module.exports.addBoard = async (req, res) => {
   try {
-    
+
     const newBoard = new board({
       name: req.body.board
     });
-  
+
     newBoard.save()
       .then(savedBoard => {
-        res.status(201).json({message:'Board is added',success:true});
+        res.status(201).json({ message: 'Board is added', success: true });
       })
       .catch(error => {
-        res.status(500).json({ error: error.message ,success:false});
+        res.status(500).json({ error: error.message, success: false });
       });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: error.message ,success:false});
+    res.status(500).json({ error: error.message, success: false });
   }
 }
 
 module.exports.updateBoard = async (req, res, next) => {
   try {
-    
+
     const { id } = req.query
 
 
@@ -32,11 +32,11 @@ module.exports.updateBoard = async (req, res, next) => {
       name: req.body.name
     }
 
-    
+
     let updatedNote = await board.findByIdAndUpdate({ _id: id }, updatedData)
 
-      res.json({ message: "Board is updated successfully", updated: true });
-     
+    res.json({ message: "Board is updated successfully", updated: true });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something gone wrong", updated: false });
@@ -49,7 +49,7 @@ module.exports.adminBoardListOrUnList = async (req, res, next) => {
     const { id } = req.query
     const BoardToListOrUnList = await board.findById(id)
     if (BoardToListOrUnList.listed) {
-      
+
       await board.updateOne({ _id: id }, { $set: { listed: false } })
       res.json({ message: 'Board is successfully unlisted', success: true })
     } else {
@@ -63,10 +63,10 @@ module.exports.adminBoardListOrUnList = async (req, res, next) => {
   }
 }
 
-module.exports.allBoards = async(req,res,next) =>{
+module.exports.allBoards = async (req, res, next) => {
   try {
 
-    const boards = await board.find({listed:true})
+    const boards = await board.find({ listed: true })
     res.json({ status: true, message: "success", boards });
 
   } catch (error) {
@@ -74,19 +74,19 @@ module.exports.allBoards = async(req,res,next) =>{
   }
 }
 
-module.exports.adminAllBoards = async(req,res,next) =>{
+module.exports.adminAllBoards = async (req, res, next) => {
   try {
 
-    const {id} = req.query
+    const { id } = req.query
 
-    if(!id){
+    if (!id) {
       const boards = await board.find()
       res.json({ status: true, message: "success", boards });
     }
-    else{
+    else {
       const boards = await board.findById(id)
       res.json({ status: true, message: "success", boards });
-    }    
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Server gone...' })
@@ -95,7 +95,7 @@ module.exports.adminAllBoards = async(req,res,next) =>{
 
 
 
-module.exports.boardContentCount = async (req,res,next) =>{
+module.exports.boardContentCount = async (req, res, next) => {
   try {
     const boards = await board.aggregate([
       {

@@ -15,7 +15,7 @@ let signupData;
 let tutorSignupData;
 
 
- 
+
 
 
 
@@ -35,11 +35,11 @@ let verifyPhoneOTP = async (phone, otpPhone) => {
     })
     .then((verification_check) => {
       if (verification_check.status === "approved") {
-        return Promise.resolve({phoneStatus:"success",});
+        return Promise.resolve({ phoneStatus: "success", });
       } else {
-        return Promise.reject({ phoneStatus:"error"});
+        return Promise.reject({ phoneStatus: "error" });
       }
-    }).catch((error)=>{
+    }).catch((error) => {
       return Promise.reject({ phoneStatus: "error" });
     })
 };
@@ -69,14 +69,14 @@ const handleErrorT = (err) => {
 
 module.exports.getOtp = async (req, res, next) => {
   try {
-    
+
     const { name, email, phone, branch, board, school, password, place } =
       req.body;
 
 
     const student = await students.findOne({ email });
     if (!student) {
-     
+
       signupData = {
         name,
         email,
@@ -91,29 +91,29 @@ module.exports.getOtp = async (req, res, next) => {
       const otpEmail = Math.floor(1000 + Math.random() * 9000);
       otp = otpEmail;
 
-      
-        let phoneOtp = await sendPhoneOTP(phone);
 
-       
-        if(phoneOtp.status === 'pending'){
-          res
-            .status(200)
-            .json({
-              message: "OTP is sent to given phone number",
-              otpSend: true,
-            });
-        }else{
-          res
+      let phoneOtp = await sendPhoneOTP(phone);
+
+
+      if (phoneOtp.status === 'pending') {
+        res
+          .status(200)
+          .json({
+            message: "OTP is sent to given phone number",
+            otpSend: true,
+          });
+      } else {
+        res
           .status(200)
           .json({
             message: "Error while sending otp,please try again",
             otpSend: false,
           });
-        }
-        
-      
-      
-      
+      }
+
+
+
+
     } else {
       res
         .status(200)
@@ -130,43 +130,43 @@ module.exports.getOtp = async (req, res, next) => {
 };
 
 module.exports.signup = async (req, res, next) => {
-  
+
   try {
     const { name, email, phone, branch, board, school, password, place } = signupData;
     const { otpPhone } = req.body;
-    
-     let phoneVerify = await verifyPhoneOTP(phone, otpPhone)
-      
 
-     if(phoneVerify.phoneStatus==="success"){
-       const student = await students.create({
-         name,
-         email,
-         phone,
-         branch,
-         board,
-         school,
-         password,
-         place,
-       });
+    let phoneVerify = await verifyPhoneOTP(phone, otpPhone)
 
-       res
-         .status(200)
-         .json({ message: "Successfully registered", created: true });
 
-     } else {
-        
-       res.status(400).json({ message: "Incorrect OTP", created: false });
-     } 
-        
+    if (phoneVerify.phoneStatus === "success") {
+      const student = await students.create({
+        name,
+        email,
+        phone,
+        branch,
+        board,
+        school,
+        password,
+        place,
+      });
+
+      res
+        .status(200)
+        .json({ message: "Successfully registered", created: true });
+
+    } else {
+
+      res.status(400).json({ message: "Incorrect OTP", created: false });
+    }
+
   } catch (error) {
-    console.log(error,"er")
-     if(error.phoneStatus === 'error'){
-       res.status(400).json({ errors: "Entered OTP is incorrect", created: false });
-     }else{
+    console.log(error, "er")
+    if (error.phoneStatus === 'error') {
+      res.status(400).json({ errors: "Entered OTP is incorrect", created: false });
+    } else {
       let errors = handleError(error);
       res.status(400).json({ errors, created: false });
-     }
+    }
   }
 };
 
@@ -175,9 +175,9 @@ module.exports.signin = async (req, res, next) => {
     const { email, password } = req.body;
     const student = await students.findOne({ email })
     if (student) {
-      if(student.blocked){
+      if (student.blocked) {
         res.json({ message: "Your account is blocked by the admin", created: false });
-      }else{
+      } else {
         const auth = await bcrypt.compare(password, student.password);
         if (auth) {
           const token = createToken(student._id);
@@ -198,15 +198,15 @@ module.exports.signin = async (req, res, next) => {
   }
 };
 
-module.exports.getTutorOtp = async (req,res,next) => {
+module.exports.getTutorOtp = async (req, res, next) => {
   try {
-    
-    const { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch} = req.body;
+
+    const { name, email, phone, subjects, timeFrom, timeTo, profession, password, place, board, branch } = req.body;
 
     const tutor = await tutors.findOne({ email });
-    if(!tutor){
+    if (!tutor) {
 
-      tutorSignupData = { name,email, phone, subjects, timeFrom, timeTo,profession,password,place,board,branch}
+      tutorSignupData = { name, email, phone, subjects, timeFrom, timeTo, profession, password, place, board, branch }
 
       const otpEmail = Math.floor(1000 + Math.random() * 9000);
       otpTutor = otpEmail;
@@ -214,9 +214,9 @@ module.exports.getTutorOtp = async (req,res,next) => {
       // let info = await sendEmailOTP(email, otpEmail)
 
       // if (info.emailStatus === "success") {
-        let phoneOtp = await sendPhoneOTP(phone);
-    
-        if(phoneOtp.status === "pending"){
+      let phoneOtp = await sendPhoneOTP(phone);
+
+      if (phoneOtp.status === "pending") {
         res
           .status(200)
           .json({
@@ -232,8 +232,8 @@ module.exports.getTutorOtp = async (req,res,next) => {
           });
       }
 
-      
-    }else {
+
+    } else {
       res
         .status(200)
         .json({
@@ -248,54 +248,54 @@ module.exports.getTutorOtp = async (req,res,next) => {
   }
 }
 module.exports.tutorSignup = async (req, res, next) => {
-  
+
 
   try {
     const { name, email, phone, subjects, timeFrom, timeTo, profession, password, place, board, branch } = tutorSignupData;
     const { otpPhone } = req.body;
 
-    
-    let phoneVerify = await verifyPhoneOTP(phone,otpPhone) 
-       
-    if(phoneVerify.phoneStatus === "success"){
-        const tutor = await tutors.create({
-          name,
-          email,
-          phone,
-          subjects,
-          timeFrom,
-          timeTo,
-          profession,
-          password,
-          place,
-          board,
-          branch
-        });
-    res.status(200).json({ message: "Successfully registered", created: true });
 
-      }else{
-       
-        res.status(200)
-            .json({
-              message: "Entered OTP  is incorrect",
-              created: false,
-            });
-      }
+    let phoneVerify = await verifyPhoneOTP(phone, otpPhone)
+
+    if (phoneVerify.phoneStatus === "success") {
+      const tutor = await tutors.create({
+        name,
+        email,
+        phone,
+        subjects,
+        timeFrom,
+        timeTo,
+        profession,
+        password,
+        place,
+        board,
+        branch
+      });
+      res.status(200).json({ message: "Successfully registered", created: true });
+
+    } else {
+
+      res.status(200)
+        .json({
+          message: "Entered OTP  is incorrect",
+          created: false,
+        });
+    }
 
   } catch (error) {
     console.log(error);
-    if(error.phoneStatus === "error"){
+    if (error.phoneStatus === "error") {
       res
         .status(200)
         .json({
           message: "Entered OTP is incorrect",
           created: false,
         });
-    }else{
+    } else {
       const errors = handleErrorT(error);
       res.status(400).json({ errors, created: false });
     }
-    
+
   }
 };
 
@@ -304,9 +304,9 @@ module.exports.tutorSignin = async (req, res, next) => {
     const { email, password } = req.body;
     const tutor = await tutors.findOne({ email }).populate('branch', 'name').populate('board', 'name')
     if (tutor) {
-      if(tutor.blocked){
+      if (tutor.blocked) {
         res.json({ message: "Your account is blocked by admin", created: false });
-      }else{
+      } else {
         const auth = await bcrypt.compare(password, tutor.password);
         if (auth) {
           const token = createToken(tutor._id);
@@ -324,7 +324,7 @@ module.exports.tutorSignin = async (req, res, next) => {
           res.json({ message: "Password is incorrect", created: false });
         }
       }
-      
+
     } else {
       res.json({ message: "No tutor with the entered email", created: false });
     }
@@ -343,7 +343,7 @@ module.exports.adminSignin = async (req, res, next) => {
       const auth = await bcrypt.compare(password, admin.password);
       if (auth) {
         const token = createToken(admin._id);
-        res.json({ message: "Login successful", created: true, token,admin });
+        res.json({ message: "Login successful", created: true, token, admin });
       } else {
         res.json({ message: "Password is incorrect", created: false });
       }
@@ -361,7 +361,7 @@ module.exports.adminSignin = async (req, res, next) => {
 
 
 
-module.exports.boards = async(req,res,next) =>{
+module.exports.boards = async (req, res, next) => {
   try {
 
     const board = await boards.find()
@@ -373,27 +373,27 @@ module.exports.boards = async(req,res,next) =>{
 }
 
 
-module.exports.branches = async(req,res,next)=>{
+module.exports.branches = async (req, res, next) => {
   try {
-    
-    const {board} = req.query
+
+    const { board } = req.query
 
     if (!board) {
-    const branches = await branch.find()
-    res.json({ status: true, message: "success", branches });
-       
-    }else{
-    const selectedBoard = await boards.findById(board)
-    if(!selectedBoard){
+      const branches = await branch.find()
+      res.json({ status: true, message: "success", branches });
 
-      return res.status(404).json({message:'selected board not found'})
-    }
-    const branches = await branch.find({board:selectedBoard})
-    res.json({ status: true, message: "success", branches });
+    } else {
+      const selectedBoard = await boards.findById(board)
+      if (!selectedBoard) {
+
+        return res.status(404).json({ message: 'selected board not found' })
+      }
+      const branches = await branch.find({ board: selectedBoard })
+      res.json({ status: true, message: "success", branches });
     }
 
   } catch (error) {
     console.log(error);
-    res.status(500).json({message:'Server gone...'})
+    res.status(500).json({ message: 'Server gone...' })
   }
 }

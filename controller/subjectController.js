@@ -4,60 +4,60 @@ const branches = require('../models/branchModel')
 
 
 
-module.exports.addSubject = async(req,res) => {
+module.exports.addSubject = async (req, res) => {
   try {
-     
+
     const newSubject = new subject({
       name: req.body.subject,
-      board:req.body.board,
-      branch:req.body.branch
+      board: req.body.board,
+      branch: req.body.branch
     });
-  
+
     newSubject.save()
       .then(savedSubject => {
-        res.status(201).json({message:'Subject is added',success:true});
+        res.status(201).json({ message: 'Subject is added', success: true });
       })
       .catch(error => {
-        res.status(500).json({ error: error.message ,success:false});
+        res.status(500).json({ error: error.message, success: false });
       });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: error.message ,success:false});
+    res.status(500).json({ error: error.message, success: false });
   }
 }
 
 
-module.exports.allSubjects = async(req,res,next)=>{
+module.exports.allSubjects = async (req, res, next) => {
   try {
-    
-    const {branch} = req.query
- 
-    if (!branch) {
-    const subjects = await subject.find({listed:true}).populate('branch','name')
-    
-    res.json({ status: true, message: "success", subjects })
-       
-    }else{
-    const selectedBranch = await branches.findById(branch)
-    if(!selectedBranch){
 
-      return res.status(404).json({message:'selected branch not found'})
-    }
-    const subjects = await subject.find({branch:selectedBranch,listed:true}).populate('branch','name')
-    res.json({ status: true, message: "success", subjects });
+    const { branch } = req.query
+
+    if (!branch) {
+      const subjects = await subject.find({ listed: true }).populate('branch', 'name')
+
+      res.json({ status: true, message: "success", subjects })
+
+    } else {
+      const selectedBranch = await branches.findById(branch)
+      if (!selectedBranch) {
+
+        return res.status(404).json({ message: 'selected branch not found' })
+      }
+      const subjects = await subject.find({ branch: selectedBranch, listed: true }).populate('branch', 'name')
+      res.json({ status: true, message: "success", subjects });
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({message:'Server gone...'})
+    res.status(500).json({ message: 'Server gone...' })
   }
 }
 
 
 
-module.exports.adminAllSubjects = async(req,res,next)=>{
+module.exports.adminAllSubjects = async (req, res, next) => {
   try {
-    
-    const {branch} = req.query
+
+    const { branch } = req.query
     const { id } = req.query
 
     if (branch) {
@@ -68,20 +68,20 @@ module.exports.adminAllSubjects = async(req,res,next)=>{
       }
       const subjects = await subject.find({ branch: selectedBranch }).populate('branch', 'name')
       res.json({ status: true, message: "success", subjects });
-   
+
     }
-    else if(id){
+    else if (id) {
       const subjects = await subject.findById(id).populate("branch", "name")
       res.json({ status: true, message: "success", subjects });
     }
-    else{
+    else {
       const subjects = await subject.find().populate('branch', 'name')
-       
+
       res.json({ status: true, message: "success", subjects })
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({message:'Server gone...'})
+    res.status(500).json({ message: 'Server gone...' })
   }
 }
 

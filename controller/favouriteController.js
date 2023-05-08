@@ -5,45 +5,45 @@ const videos = require('../models/videosModel')
 const students = require('../models/studentModel')
 
 
-module.exports.addFavouriteNote = async(req,res,next) =>{
-try {
-  let noteId = req.params.id
-  let studentId = req.user
+module.exports.addFavouriteNote = async (req, res, next) => {
+  try {
+    let noteId = req.params.id
+    let studentId = req.user
 
-  let favouriteNote = await notes.findOne({ _id: noteId }).populate('branch', 'name').populate('subject', 'name')
+    let favouriteNote = await notes.findOne({ _id: noteId }).populate('branch', 'name').populate('subject', 'name')
 
-  let noteObj = {
-    note:noteId,
-    branch:favouriteNote.branch.name,
-    subject:favouriteNote.subject.name
-  }
-
-  let studentFavourite = await favourites.findOne({student:studentId})
-  if(studentFavourite){
-    let noteIndex = studentFavourite.notes.findIndex((p)=> p.note == noteId)
-     
-    if(noteIndex > -1){
-        res.json({added:false,message:"Selected note is already in favourites"})
+    let noteObj = {
+      note: noteId,
+      branch: favouriteNote.branch.name,
+      subject: favouriteNote.subject.name
     }
-    else{
-      await favourites.updateOne({student:studentId},{$push:{notes:noteObj}})
+
+    let studentFavourite = await favourites.findOne({ student: studentId })
+    if (studentFavourite) {
+      let noteIndex = studentFavourite.notes.findIndex((p) => p.note == noteId)
+
+      if (noteIndex > -1) {
+        res.json({ added: false, message: "Selected note is already in favourites" })
+      }
+      else {
+        await favourites.updateOne({ student: studentId }, { $push: { notes: noteObj } })
+        res.json({ added: true, message: "Selected note is added to favourites" })
+      }
+    } else {
+
+      let favouriteObj = new favourites({
+        student: studentId,
+        notes: [noteObj]
+      })
+
+      favouriteObj.save()
       res.json({ added: true, message: "Selected note is added to favourites" })
     }
-  }else{
-    
-    let favouriteObj = new favourites({
-      student:studentId,
-      notes:[noteObj]
-    })
-     
-    favouriteObj.save()
-    res.json({ added: true, message: "Selected note is added to favourites" })
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
   }
-  
-} catch (error) {
-  console.log(error);
-  res.status(500).json({ message: "Server error" });
-}
 }
 
 
@@ -61,7 +61,7 @@ module.exports.addFavouriteQuestion = async (req, res, next) => {
       subject: favouriteQuestion.subject.name
     }
 
-     
+
 
     let studentFavourite = await favourites.findOne({ student: studentId })
     if (studentFavourite) {
@@ -71,11 +71,11 @@ module.exports.addFavouriteQuestion = async (req, res, next) => {
         res.json({ added: false, message: "Selected Question Paper is already in favourites" })
       }
       else {
-        await favourites.updateOne({ student: studentId }, { $push: { questionPaper : questionObj } })
+        await favourites.updateOne({ student: studentId }, { $push: { questionPaper: questionObj } })
         res.json({ added: true, message: "Selected Question Paper is added to favourites" })
       }
     } else {
-       
+
       let favouriteObj = new favourites({
         student: studentId,
         questionPaper: [questionObj]
@@ -112,11 +112,11 @@ module.exports.addFavouriteVideo = async (req, res, next) => {
         res.json({ added: false, message: "Selected video is already in favourites" })
       }
       else {
-        await favourites.updateOne({ student: studentId }, { $push: { videos:videoObj } })
+        await favourites.updateOne({ student: studentId }, { $push: { videos: videoObj } })
         res.json({ added: true, message: "Selected video is added to favourites" })
       }
     } else {
-       
+
       let favouriteObj = new favourites({
         student: studentId,
         videos: [videoObj]
@@ -137,7 +137,7 @@ module.exports.addFavouriteVideo = async (req, res, next) => {
 module.exports.getFavouriteNotes = async (req, res, next) => {
   try {
 
-    const id  = req.user
+    const id = req.user
 
     const favourite = await favourites.findOne({ student: id }).populate('notes.note')
     const student = await students.findById(id)
@@ -148,21 +148,21 @@ module.exports.getFavouriteNotes = async (req, res, next) => {
       favouriteNote = []
       return res.json(favouriteNote);
     }
-    
+
     if (student.subscription) {
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
       if (isActive) {
-         favouriteNote = favourite.notes
+        favouriteNote = favourite.notes
         res.json(favouriteNote);
       } else {
         const favourites = favourite.notes
-         favouriteNote = favourites.filter((notes)=>notes.note.exclusive == false)
-        
+        favouriteNote = favourites.filter((notes) => notes.note.exclusive == false)
+
         res.json(favouriteNote);
       }
     } else {
       const favourites = favourite.notes
-       favouriteNote = favourites.filter((notes) => notes.note.exclusive == false)
+      favouriteNote = favourites.filter((notes) => notes.note.exclusive == false)
       res.json(favouriteNote);
     }
 
@@ -190,16 +190,16 @@ module.exports.getFavouriteQuestions = async (req, res, next) => {
     if (student.subscription) {
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
       if (isActive) {
-         favouriteQuestions = favourite.questionPaper
+        favouriteQuestions = favourite.questionPaper
         res.json(favouriteQuestions);
       } else {
         const favourites = favourite.questionPaper
-         favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
+        favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
         res.json(favouriteQuestions);
       }
     } else {
       const favourites = favourite.questionPaper
-       favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
+      favouriteQuestions = favourites.filter((ques) => ques.question.exclusive == false)
       res.json(favouriteQuestions);
     }
 
@@ -216,15 +216,15 @@ module.exports.getFavouriteVideos = async (req, res, next) => {
     const id = req.user
 
     const favourite = await favourites.findOne({ student: id }).populate('videos.video')
-    
+
     const student = await students.findById(id)
     let favouriteVideos;
- 
-    if(!favourite){
+
+    if (!favourite) {
       favouriteVideos = []
-     return res.json(favouriteVideos);
+      return res.json(favouriteVideos);
     }
-   
+
 
     if (student.subscription) {
       const isActive = Date.now() < new Date(student.subscription.expiredAt);
@@ -232,19 +232,19 @@ module.exports.getFavouriteVideos = async (req, res, next) => {
         favouriteVideos = favourite.videos
         res.json(favouriteVideos);
       } else {
-         
-          const favourites = favourite.videos
-          favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
-        
+
+        const favourites = favourite.videos
+        favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
+
         res.json(favouriteVideos);
       }
     } else {
-       
+
       const favourites = favourite.videos
-       favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
+      favouriteVideos = favourites.filter((videos) => videos.video.exclusive == false)
       res.json(favouriteVideos);
     }
-    
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -259,9 +259,9 @@ module.exports.removeFavouriteVideos = async (req, res, next) => {
     let student = req.user
 
 
-    const favourite = await favourites.updateOne({ student},{$pull:{videos:{_id:videoId}}})
- 
-  
+    const favourite = await favourites.updateOne({ student }, { $pull: { videos: { _id: videoId } } })
+
+
     res.json({ removed: true, message: "Video is removed from favourites" })
 
 

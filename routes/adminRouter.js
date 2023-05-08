@@ -1,17 +1,17 @@
-const { notesUpload, adminAllNotes, adminApproveNotes, adminNoteListOrUnList, updateNotes, adminRejectNotes } = require('../controller/notesController');
-const { questionPaperUpload, getQuestionPapers, adminAllQuestionPapers, adminApproveQuestionPaper, adminQuestionPaperListOrUnList, updateQuestionPaper, adminRejectQuestionPaper } = require('../controller/questionPaperController');
-const { verifyStudent, verifyAdmin } = require('../middleware/verifyUser');
+const { adminAllNotes, adminApproveNotes, adminNoteListOrUnList, updateNotes, adminRejectNotes } = require('../controller/notesController');
+const { adminAllQuestionPapers, adminApproveQuestionPaper, adminQuestionPaperListOrUnList, updateQuestionPaper, adminRejectQuestionPaper } = require('../controller/questionPaperController');
+const { verifyAdmin } = require('../middleware/verifyUser');
 const handleUpload = require('../middleware/fileUpload');
-const { CheckStudent, CheckAdmin } = require('../middleware/checkUser');
-const { addBoard, allBoards, adminAllBoards, updateBoard, adminBoardListOrUnList, boardContentCount } = require('../controller/boardController');
-const { addBranch, allBranches, adminAllBranches, updateBranch, adminBranchListOrUnList } = require('../controller/branchController');
-const { addSubject, allSubjects, adminAllSubjects, updateSubject, adminSubjectListOrUnList } = require('../controller/subjectController');
+const { CheckAdmin } = require('../middleware/checkUser');
+const { addBoard, adminAllBoards, updateBoard, adminBoardListOrUnList, boardContentCount } = require('../controller/boardController');
+const { addBranch, adminAllBranches, updateBranch, adminBranchListOrUnList } = require('../controller/branchController');
+const { addSubject, adminAllSubjects, updateSubject, adminSubjectListOrUnList } = require('../controller/subjectController');
 const { adminAllVideos, adminApproveVideos, adminVideoListOrUnList, updateVideos, adminRejectVideos } = require('../controller/videosController');
 const { adminAllEvents, adminEventListOrUnList, adminApproveEvent, updateEvent, adminRejectEvent } = require('../controller/eventController');
 const { addPlan, adminAllPlans, adminPlanListOrUnList, updatePlans } = require('../controller/planController');
 const { adminAllStudents, adminBlockUnblockStudent } = require('../controller/studentController');
 const { adminAllTutors, adminBlockUnblockTutor } = require('../controller/tutorController');
-const { adminApproveTutor, adminRejectTutor, planCount, monthlySales, activePlans } = require('../controller/adminController');
+const { adminApproveTutor, adminRejectTutor, activePlans } = require('../controller/adminController');
 
 const router = require('express').Router()
 
@@ -37,7 +37,7 @@ router.get('/approve-events', verifyAdmin, adminApproveEvent)
 router.get('/reject-events', verifyAdmin, adminRejectEvent)
 router.get('/question-paper-list-unlist', verifyAdmin, adminQuestionPaperListOrUnList)
 router.get('/board-content-count', verifyAdmin, boardContentCount)
-router.get('/activePlans',verifyAdmin,activePlans)
+router.get('/activePlans', verifyAdmin, activePlans)
 
 
 router.put('/board-list-unlist', verifyAdmin, adminBoardListOrUnList)

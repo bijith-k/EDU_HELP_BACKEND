@@ -113,7 +113,7 @@ module.exports.adminRejectTutor = async (req, res, next) => {
 
 
 
-module.exports.activePlans = async(req,res) => {
+module.exports.activePlans = async (req, res) => {
   try {
 
     const plan = await plans.aggregate([
@@ -133,12 +133,12 @@ module.exports.activePlans = async(req,res) => {
       }
     ]);
 
-    
-    res.json({planCount:plan});
 
-    
+    res.json({ planCount: plan });
+
+
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Something gone wrong"});
+    res.status(500).json({ message: "Something gone wrong" });
   }
 }

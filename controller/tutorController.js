@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const Otp = require('../models/otpModel')
 
 
- 
+
 
 let transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
@@ -45,55 +45,55 @@ let sendChangePasswordOtp = (email, otp) => {
 };
 
 
-module.exports.adminAllTutors = async(req,res,next) => {
+module.exports.adminAllTutors = async (req, res, next) => {
   try {
-    const tutor = await tutors.find({rejected:false}).populate('branch', 'name').populate('board', 'name')
-     
-     res.json(tutor);
+    const tutor = await tutors.find({ rejected: false }).populate('branch', 'name').populate('board', 'name')
+
+    res.json(tutor);
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 }
 
 
 
-module.exports.adminBlockUnblockTutor = async(req,res,next) =>{
+module.exports.adminBlockUnblockTutor = async (req, res, next) => {
   try {
-    const {tutor} = req.query
+    const { tutor } = req.query
     const tutorsToUpdate = await tutors.findById(tutor)
-    if(tutorsToUpdate.blocked){
-      await tutors.updateOne({_id:tutor},{$set:{blocked:false}})
-      res.json({message:'Tutor is successfully unblocked',success:true})
-    }else{
-      await tutors.updateOne({_id:tutor},{$set:{blocked:true}})
-      res.json({message:'Tutor is successfully blocked',success:true})
+    if (tutorsToUpdate.blocked) {
+      await tutors.updateOne({ _id: tutor }, { $set: { blocked: false } })
+      res.json({ message: 'Tutor is successfully unblocked', success: true })
+    } else {
+      await tutors.updateOne({ _id: tutor }, { $set: { blocked: true } })
+      res.json({ message: 'Tutor is successfully blocked', success: true })
     }
-    
+
   } catch (error) {
     console.log(error);
-res.status(500).json({ message: "Something gone wrong", success: false });
+    res.status(500).json({ message: "Something gone wrong", success: false });
   }
 }
 
 
-module.exports.getTutors = async(req,res,next) =>{
+module.exports.getTutors = async (req, res, next) => {
   try {
-      const {id} = req.query
-      if(id){
-        const tutor = await tutors.find({_id:id, blocked: false,rejected:false,approved:true }).populate('branch', 'name').populate('board', 'name')
-       
-        res.json(tutor);
-      }else{
-        const tutor = await tutors.find({ blocked: false, rejected: false, approved: true }).populate('branch', 'name').populate('board', 'name')
-       
-        res.json(tutor);
-      }
-      
-    
-    
+    const { id } = req.query
+    if (id) {
+      const tutor = await tutors.find({ _id: id, blocked: false, rejected: false, approved: true }).populate('branch', 'name').populate('board', 'name')
+
+      res.json(tutor);
+    } else {
+      const tutor = await tutors.find({ blocked: false, rejected: false, approved: true }).populate('branch', 'name').populate('board', 'name')
+
+      res.json(tutor);
+    }
+
+
+
   } catch (err) {
-    console.error(err);
+    console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -101,7 +101,7 @@ module.exports.getTutors = async(req,res,next) =>{
 
 module.exports.updateProfile = async (req, res) => {
   try {
-    
+
     const { id } = req.query
 
 
@@ -112,10 +112,10 @@ module.exports.updateProfile = async (req, res) => {
       email: req.body.email,
       phone: req.body.phone,
       subjects: req.body.subjects,
-      timeFrom:req.body.timeFrom,
-      timeTo:req.body.timeTo,
-      place:req.body.place,
-      profession:req.body.profession
+      timeFrom: req.body.timeFrom,
+      timeTo: req.body.timeTo,
+      place: req.body.place,
+      profession: req.body.profession
     }
 
     if (req.file) {
@@ -142,15 +142,15 @@ module.exports.passwordChangeOtp = async (req, res) => {
     const email = req.body.email
 
     const otpPassword = Math.floor(1000 + Math.random() * 9000);
-    
+
     const otpObj = new Otp({
       email,
       otp: otpPassword,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 minutes
     });
     await otpObj.save();
-    
-     
+
+
     let info = await sendChangePasswordOtp(email, otpPassword)
     if (info.emailStatus === "success") {
       res
@@ -176,12 +176,12 @@ module.exports.passwordChangeOtp = async (req, res) => {
 
 module.exports.changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword,otp,email } = req.body
-    const id  = req.user
+    const { currentPassword, newPassword, otp, email } = req.body
+    const id = req.user
 
-  
-    const otpObj = await Otp.findOne({ email}).sort({ createdAt: -1 });
-    
+
+    const otpObj = await Otp.findOne({ email }).sort({ createdAt: -1 });
+
     if (!otpObj) {
       return res.status(200).json({ message: 'OTP is not valid or has expired' });
     }
@@ -192,19 +192,19 @@ module.exports.changePassword = async (req, res) => {
       await otpObj.deleteOne()
       return res.status(200).json({ message: 'OTP has expired' });
     }
-    
 
-      const tutor = await tutors.findById(id)
-      const auth = await bcrypt.compare(currentPassword, tutor.password)
-      if (auth) {
-        tutor.password = newPassword
-        await tutor.save()
-        await otpObj.deleteOne()
-        return res.status(200).json({ message: 'Password changed successfully', updated: true })
-      } else {
-        return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
-      }
-    
+
+    const tutor = await tutors.findById(id)
+    const auth = await bcrypt.compare(currentPassword, tutor.password)
+    if (auth) {
+      tutor.password = newPassword
+      await tutor.save()
+      await otpObj.deleteOne()
+      return res.status(200).json({ message: 'Password changed successfully', updated: true })
+    } else {
+      return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
+    }
+
 
   } catch (error) {
     console.log(error);
