@@ -106,8 +106,6 @@ module.exports.updateProfile = async (req, res) => {
 
 
     let updatedData = {
-      board: req.body.board,
-      branch: req.body.branch,
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
@@ -115,7 +113,6 @@ module.exports.updateProfile = async (req, res) => {
       timeFrom: req.body.timeFrom,
       timeTo: req.body.timeTo,
       place: req.body.place,
-      profession: req.body.profession
     }
 
     if (req.file) {
@@ -209,6 +206,42 @@ module.exports.changePassword = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Internal Server Error' })
+  }
+}
+
+
+module.exports.reApply = async(req,res) =>{
+  try {
+    const id = req.user
+     
+    let updatedData = {
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      subjects: req.body.subjects,
+      timeFrom: req.body.timeFrom,
+      timeTo: req.body.timeTo,
+      place: req.body.place,
+      profession:req.body.profession,
+      board: req.body.board,
+      branch: req.body.branch,
+      rejected:false,
+      $unset: {
+        rejection_reason: 1
+      }
+    }
+
+    let updatedProfile = await tutors.findByIdAndUpdate({ _id: id }, updatedData)
+    let tutor = await tutors.findById(id).populate('branch', 'name').populate('board', 'name')
+
+    if (updatedProfile) {
+      res.json({ message: "Application is submitted",tutor, submitted: true });
+    } else {
+      res.status(500).json({ message: "Error while submitting", submitted: false });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something gone wrong", updated: false });
   }
 }
 

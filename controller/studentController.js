@@ -322,7 +322,7 @@ module.exports.passwordChangeOtp = async (req, res) => {
     });
     await otpObj.save();
 
-
+ 
     let info = await sendChangePasswordOtp(email, otpPassword)
     if (info.emailStatus === "success") {
       res
@@ -348,6 +348,7 @@ module.exports.passwordChangeOtp = async (req, res) => {
 
 module.exports.changePassword = async (req, res) => {
   try {
+    
     const { currentPassword, newPassword, otp, email } = req.body
     const id = req.user
 
@@ -375,8 +376,7 @@ module.exports.changePassword = async (req, res) => {
     } else {
       return res.status(200).json({ message: 'Entered password is incorrect', updated: false })
     }
-
-
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Internal Server Error' })

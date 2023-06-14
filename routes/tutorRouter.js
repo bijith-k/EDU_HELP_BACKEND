@@ -11,7 +11,7 @@ const { addEvent } = require('../controller/eventController');
 const { getConversation } = require('../controller/conversationController');
 const { newMessage, getMessage } = require('../controller/messageController');
 const { getStudents } = require('../controller/studentController');
-const { updateProfile, changePassword, passwordChangeOtp } = require('../controller/tutorController');
+const { updateProfile, changePassword, passwordChangeOtp, reApply } = require('../controller/tutorController');
 
 const router = require('express').Router()
 
@@ -33,6 +33,7 @@ router.post('/add-event', verifyTutor, handleUpload('poste'), addEvent)
 router.post('/edit-profile-details', verifyTutor, handleUpload('profilePic'), updateProfile)
 router.post('/get-password-change-otp', verifyTutor, passwordChangeOtp)
 router.post('/change-password', verifyTutor, changePassword)
+router.post('/reapply',verifyTutor,reApply)
 
 
 router.put('/notes-private-public', verifyTutor, privatePublicNotes)
