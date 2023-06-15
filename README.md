@@ -13,7 +13,7 @@ Admin can control both the students and tutors and the contents in the applicati
 
 
 
-![Logo](https://drive.google.com/uc?id=1fjZv9tnx16gvTbSw9WA1176zIr2HSTG6)
+![Logo](https://drive.google.com/uc?id=1Vdj3Qhunmzd5INfvFjBAKGWnR5DB2dCa)
 
 
 ## Technologies used
