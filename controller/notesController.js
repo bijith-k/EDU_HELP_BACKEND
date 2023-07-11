@@ -206,7 +206,7 @@ module.exports.deleteNotes = async (req, res) => {
 
     const filePath = path.join(__dirname, "../public", note.file_path)
     // fs.unlinkSync(filePath)
-    await fs.promises.unlink(filePath)
+    // await fs.promises.unlink(filePath)
 
     await notes.deleteOne({ _id: id })
     res.json({ message: "Note removed successfully" })

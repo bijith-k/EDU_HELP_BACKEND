@@ -199,7 +199,7 @@ module.exports.deleteQuestionPaper = async (req, res) => {
 
     const filePath = path.join(__dirname, "../public", questionPaper.file_path)
     // fs.unlinkSync(filePath)
-    await fs.promises.unlink(filePath)
+    // await fs.promises.unlink(filePath)
 
     await questionPapers.deleteOne({ _id: id })
     res.json({ message: "Question paper removed successfully" })
